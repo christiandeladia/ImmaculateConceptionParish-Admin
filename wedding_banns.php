@@ -97,19 +97,56 @@ $total_ended_wedding_banns = getendedAdminCount();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="image/admin.ico">
-    <title>Wedding Banns |  Admin</title>
+    <title>Wedding Banns | Admin</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css">
     <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- Include jQuery and DataTables libraries -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css">
-    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <script>
+    $(document).ready(function() {
+        // Initialize DataTables
+        // $('#dataTable').DataTable();
+        $('#dataTableAll').DataTable();
+        $('#dataTableRemove').DataTable();
+
+        // Show modal form for adding new data
+        $('#addmodalbutton').click(function() {
+            $('#modalTitle').text('Publish New Wedding Banns');
+            $('#admin_dataForm')[0].reset();
+            $('#weddingbannsModal').modal('show');
+        });
+
+        // Save data
+        $('#add_adminBtn').click(function() {
+            // Perform your save operation here
+            // ...
+
+            $('#dataModal').modal('hide');
+        });
+
+        // Edit data
+        $(document).on('click', '.editBtn', function() {
+            $('#modalTitle').text('Edit Data');
+            var data = $(this).data('info');
+            // Populate the form fields with data
+            $('#id').val(data.id);
+            $('#name').val(data.name);
+            $('#email').val(data.email);
+            $('#dataModal').modal('show');
+        });
+
+        // Delete data
+        $(document).on('click', '.deleteBtn', function() {
+            var data = $(this).data('info');
+            // Perform your delete operation here
+            // ...
+        });
+    });
+    </script>
 </head>
 <style>
 .custom-tab-content {
@@ -122,7 +159,7 @@ $total_ended_wedding_banns = getendedAdminCount();
 .nav-fill {
 
     >.nav-link,
-    .nav-data {
+    .nav-item {
         border: 1px #dee2e6 solid;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
@@ -130,7 +167,7 @@ $total_ended_wedding_banns = getendedAdminCount();
 }
 
 .nav-link:active,
-.nav-data.show .nav-link {
+.nav-item.show .nav-link {
     color: black;
     background-color: $nav-tabs-link-active-bg;
     border-color: $nav-tabs-link-active-border-color;
@@ -200,19 +237,26 @@ li a:hover {
 tr {
     text-align: center !important;
 }
+
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
+}
 </style>
 
 <body>
     <?php $activePage = 'services'; include 'nav.php';?>
     <div></div>
     <div class="product">
-        <nav aria-label="breadcrumb">
+        <!-- <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active">Home</li>
                 <li class="breadcrumb-item active">Wedding</li>
                 <li class="breadcrumb-item active">Application Form</li>
             </ol>
-        </nav>
+        </nav> -->
         <!-- header -->
         <div class=".container-fluid mt-4 card mb-2 bg-light shadow" style=" margin: 0 3%">
             <div class="card-body">
@@ -234,14 +278,14 @@ tr {
                 <nav>
                     <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
 
-                        <a class="nav-data nav-link active" id="nav-Approved-tab" data-toggle="tab" href="#nav-Approved"
-                            role="tab" aria-controls="nav-Approved" aria-selected="false">Ongoing
+                        <a class="nav-item nav-link active" id="nav-Approved-tab" data-toggle="tab" href="#nav-Approved"
+                            role="tab" aria-controls="nav-Approved" aria-selected="true">Ongoing
                             <?php if ($total_ongoing_wedding_banns > 0): ?>
                             <span
                                 class="badge badge-primary rounded-circle p-2"><?php echo $total_ongoing_wedding_banns; ?></span>
                             <?php endif; ?></a>
 
-                        <a class="nav-data nav-link" id="nav-completed-tab" data-toggle="tab" href="#nav-completed"
+                        <a class="nav-item nav-link" id="nav-completed-tab" data-toggle="tab" href="#nav-completed"
                             role="tab" aria-controls="nav-completed" aria-selected="false">Ended
                             <?php if ($total_ended_wedding_banns > 0): ?>
                             <span
@@ -257,6 +301,12 @@ tr {
                     <div class="tab-pane fade show active" id="nav-Approved" role="tabpanel"
                         aria-labelledby="nav-Approved-tab">
                         <br>
+
+                        <button type="button" class="btn btn-primary mb-2" id="addmodalbutton"><i
+                                class="fas fa-plus"></i>
+                            Create</button>
+                        <br><br>
+
                         <!-- ONGOING TABLE -->
                         <table id="dataTableApprove" class="table table-striped table-responsive-lg" cellspacing="0"
                             width="100%">
@@ -342,6 +392,22 @@ tr {
                                             </div>
 
                                             <div class="modal-body">
+                                                <div class="form-row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="date_marriage">Date of Marriage:</label>
+                                                            <input type="date" class="form-control" id="date_marriage"
+                                                                name="date_marriage" value="<?= $data["date_marriage"] ?>" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="place_marriage">Place of Marriage:</label>
+                                                            <input type="text" class="form-control" id="place_marriage"
+                                                                name="place_marriage" value="<?= $data["place_marriage"] ?>" disabled>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="groom_name">Groom's Name:</label>
@@ -477,8 +543,8 @@ tr {
                                             </p>
                                         </div>
                                     </td>
-                              
-                                  
+
+
                                     <td class="text-center align-left">
                                         <?php if ($data['status'] == 'ongoing'): ?>
                                         <span class="badge badge-success rounded-pill d-inline">Ongoing</span>
@@ -633,6 +699,123 @@ tr {
         <img class="modal_img" id="modalImage">
     </div>
 
+
+    <!-- ADD Modal form -->
+    <div id="weddingbannsModal" class="modal fade">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalTitle"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form action="wedding_banns/add.php" id="admin_dataForm" method="post"
+                        enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="date_marriage">Date of Marriage:</label>
+                                    <input type="date" class="form-control" id="date_marriage" name="date_marriage"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group" id="place">
+                                    <label for="place_marriage">Place of Marriage:</label>
+                                    <select class="form-control" name="place_marriage" required
+                                        onchange="checkOther(this)">
+                                        <option value="Immaculate Conception Parish Pandi">Immaculate Conception Parish
+                                            Pandi</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div id="other_place_container" style="display: none;" class="form-group">
+                                    <label for="other_place">Other Place:</label>
+                                    <input type="text" class="form-control" id="place_marriage" name="place_marriage">
+                                </div>
+                            </div>
+                            <script>
+                            function checkOther(select) {
+                                var other = document.getElementById('other_place_container');
+                                var place = document.getElementById('place');
+
+                                if (select.value === 'other') {
+                                    other.style.display = 'block';
+                                    place.style.display = 'none';
+                                } else {
+                                    other.style.display = 'none';
+                                    place.style.display = 'block';
+                                }
+                            }
+                            </script>
+                        </div><br>
+
+                        <div class="row" style="border-top: 1px solid #ccc;">
+                            <div class="col-md-6">
+                                <br>
+                                <div class="form-group">
+                                    <label for="id_picture_groom">Groom's ID Picture:</label>
+                                    <input type="file" class="form-control" id="id_picture_groom"
+                                        name="id_picture_groom" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="groom_name">Groom's Fullname:</label>
+                                    <input type="text" class="form-control" id="groom_name" name="groom_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="groom_age">Groom's Age:</label>
+                                    <input type="text" class="form-control" id="groom_age" name="groom_age" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="groom_father_name">Groom's Father Fullname:</label>
+                                    <input type="text" class="form-control" id="groom_father_name"
+                                        name="groom_father_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="groom_mother_name">Groom's Mother Fullname:</label>
+                                    <input type="text" class="form-control" id="groom_mother_name"
+                                        name="groom_mother_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="border-left: 1px solid #ccc;">
+                                <br>
+                                <div class="form-group">
+                                    <label for="id_picture_bride">Bride's ID Picture:</label>
+                                    <input type="file" class="form-control" id="id_picture_bride"
+                                        name="id_picture_bride" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bride_name">Bride's Fullname:</label>
+                                    <input type="text" class="form-control" id="bride_name" name="bride_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bride_age">Bride's Age:</label>
+                                    <input type="text" class="form-control" id="bride_age" name="bride_age" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bride_father_name">Bride's Father Fullname:</label>
+                                    <input type="text" class="form-control" id="bride_father_name"
+                                        name="bride_father_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bride_mother_name">Bride's Mother Fullname:</label>
+                                    <input type="text" class="form-control" id="bride_mother_name"
+                                        name="bride_mother_name" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" name="submit" class="btn btn-primary" id="add_adminBtn"><i
+                                    class="fas fa-upload"></i> Publish</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 </body>
 <script>
 $(document).on('click', '.endedbutton', function() {
@@ -710,6 +893,32 @@ $(document).ready(function() {
     });
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the select element
+    var placeSelect = document.getElementById("place_of_marriage");
+    // Get the container for the "Other Place" input
+    var otherPlaceContainer = document.getElementById("other_place_container");
+    // Get the input field for "Other Place"
+    var otherPlaceInput = document.getElementById("other_place");
+
+    // Add event listener to the select element
+    placeSelect.addEventListener("change", function() {
+        // If the selected value is "others", show the input field
+        if (placeSelect.value === "others") {
+            otherPlaceContainer.style.display = "block";
+            // Make the "Other Place" input field required
+            otherPlaceInput.required = true;
+        } else {
+            // If the selected value is not "others", hide the input field
+            otherPlaceContainer.style.display = "none";
+            // Make the "Other Place" input field not required
+            otherPlaceInput.required = false;
+        }
+    });
+});
+</script>
+
 <!-- OTHERS JS -->
 
 

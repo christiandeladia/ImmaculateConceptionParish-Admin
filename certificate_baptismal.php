@@ -26,7 +26,7 @@ $row = mysqli_fetch_assoc($result);
 <?php 
 function getbinyag_request_certificateData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag_request_certificate";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag_request_certificate";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -178,6 +178,12 @@ li a:hover {
 tr {
     text-align: center !important;
 }
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
+}
 </style>
 
 
@@ -275,6 +281,8 @@ tr {
                                 $childFirstName = $item['child_first_name'];
                                 $motherMaidenLastname = $item['mother_maiden_lastname'];
                                 $fatherLastname = $item['father_lastname'];
+                                $godmother = $item['godmother'];
+                                $godfather = $item['godfather'];
                                 $status = 'Not Available';
                                 
                                 // Assuming $pdo is your database connection
@@ -440,13 +448,37 @@ tr {
                                         <div class="form-row">
                                             <div class="form-group col-md">
                                                 <label for="godfather">Godfather:</label>
-                                                <input type="text" class="form-control" name="godfather" required>
+                                                <input type="text" value="<?= $godfather; ?>" class="form-control" name="godfather" required>
                                             </div>
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group col-md">
                                                 <label for="godmother">Godmother:</label>
-                                                <input type="text" class="form-control" name="godmother" required>
+                                                <input type="text" value="<?= $godmother; ?>" class="form-control" name="godmother" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md">
+                                                <label for="line_no">Line Number:</label>
+                                                <input type="text" class="form-control" name="line_no" required>
+                                            </div>
+                                            <div class="form-group col-md">
+                                                <label for="book_no">Book Number:</label>
+                                                <input type="text" class="form-control" name="book_no" required>
+                                            </div>
+                                            <div class="form-group col-md">
+                                                <label for="page_no">Page Number:</label>
+                                                <input type="text" class="form-control" name="page_no" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md">
+                                                <label for="issued">Issued:</label>
+                                                <input type="text" value="<?= $item["purpose"] ?>" class="form-control" name="issued" required>
+                                            </div>
+                                            <div class="form-group col-md">
+                                                <label for="fors">For:</label>
+                                                <input type="text" class="form-control" name="fors" required>
                                             </div>
                                         </div>
                                     </div>
@@ -454,7 +486,7 @@ tr {
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Cancel</button>
                                         <button type="submit" class="btn btn-success"
-                                            onclick="sendApprovalEmailAndApprove(<?php echo $item['id']; ?>)">OK</button>
+                                            onclick="approveBinyagRequestCertificate(<?php echo $item['id']; ?>)">OK</button>
 
                                     </div>
                                 </form>
@@ -481,7 +513,7 @@ tr {
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-                                <form method="POST" action="baptismal_decline.php">
+                                <form method="POST" action="certificate_baptismal_decline.php">
                                     <div class="modal-body">
                                         <div class="form-row">
                                             <div class="form-group col-md">
@@ -528,7 +560,7 @@ tr {
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Cancel</button>
                                         <button type="submit" class="btn btn-success"
-                                            onclick="sendApprovalEmailAndApprove(<?php echo $declineItem['id']; ?>)">OK</button>
+                                            onclick="declineBinyagRequestCertificate(<?php echo $declineItem['id']; ?>)">OK</button>
                                     </div>
                                 </form>
                             </div>
@@ -598,6 +630,8 @@ tr {
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                             </div>
+                                            
+                                            <div class="modal-body">
                                             <div class="form-row">
                                                 <div class="form-group col-md">
                                                     <label for="child_first_name">Child's Firstname:</label>
@@ -616,7 +650,6 @@ tr {
                                                         value="<?= $item["father_lastname"] ?>" disabled>
                                                 </div>
                                             </div>
-                                            <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="birthdate">Birthdate:</label>
@@ -672,6 +705,31 @@ tr {
                                                         <label for="godmother">Godmother:</label>
                                                         <input type="text" class="form-control"
                                                             value="<?= $item["godmother"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="line_no">Line Number:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["line_no"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="book_no">Book Number:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["book_no"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="page_no">Page Number:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["page_no"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="issued">Issued:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["issued"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="fors">For:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["fors"] ?>" disabled>
                                                     </div>
                                                 </div>
                                             </div>
@@ -832,6 +890,21 @@ tr {
                                                         <label for="godmother">Godmother:</label>
                                                         <input type="text" class="form-control"
                                                             value="<?= $completeitem["godmother"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="line_no">Line Number:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $completeitem["line_no"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="book_no">Book Number:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $completeitem["book_no"] ?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="page_no">Page Number:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $completeitem["page_no"] ?>" disabled>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1009,10 +1082,37 @@ tr {
     </script>
 </body>
 <script>
-function sendApprovalEmailAndApprove(itemId) {
-    if (confirm('Are you sure you want to approve the application?')) {
-        sendApprovalEmail(itemId);
-    }
+function approveBinyagRequestCertificate(itemId) {
+    console.log('Item ID:', itemId);
+    $.ajax({
+        type: 'POST',
+        url: 'certificate_baptismal_approve.php',
+        data: {
+            itemId: itemId,
+            baptismal_date: $('input[name="baptismal_date"]').val(),
+            baptized_by: $('input[name="baptized_by"]').val(),
+            godfather: $('input[name="godfather"]').val(),
+            godmother: $('input[name="godmother"]').val(),
+            line_no: $('input[name="line_no"]').val(),
+            book_no: $('input[name="book_no"]').val(),
+            page_no: $('input[name="page_no"]').val(),
+            issued: $('input[name="issued"]').val(),
+            fors: $('input[name="fors"]').val()
+        },
+        success: function(response) {
+            console.log('AJAX Success:', response);
+            if (response.trim() === 'success') {
+                alert('The application approved successfully!');
+                sendApprovalEmail(itemId);
+                location.reload();
+            } else {
+                alert('Failed to approve the application. Please try again.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+        }
+    });
 }
 
 function sendApprovalEmail(itemId) {
@@ -1025,7 +1125,7 @@ function sendApprovalEmail(itemId) {
         success: function(response) {
             console.log('Email sent:', response);
             alert('Approval email has been sent!');
-            approveBinyagRequestCertificate(itemId); // Call approveWedding function after sending the email
+            // Call approveWedding function after sending the email
         },
         error: function(xhr, status, error) {
             console.error('Failed to send email:', status, error);
@@ -1033,25 +1133,47 @@ function sendApprovalEmail(itemId) {
         }
     });
 }
-function approveBinyagRequestCertificate(itemId) {
-    console.log('Item ID:', itemId);
+</script>
+
+<script>
+function sendDeclineEmail(dataId) {
+    $.ajax({
+        type: 'GET',
+        url: 'send_baptismal_cert_decline.php',
+        data: {
+            id: dataId
+        },
+        success: function(response) {
+            console.log('Email sent:', response);
+            alert('Decline email has been sent!'); // Call completeMass function after sending the email
+        },
+        error: function(xhr, status, error) {
+            console.error('Failed to send email:', status, error);
+            alert('Failed to send decline email. Please try again.');
+        }
+    });
+}
+
+function declineBinyagRequestCertificate(dataId) {
+    console.log('Item ID:', dataId);
     $.ajax({
         type: 'POST',
-        url: 'certificate_baptismal_approve.php',
+        url: 'certificate_baptismal_decline.php',
         data: {
-            itemId: itemId,
-            baptismal_date: $('input[name="baptismal_date"]').val(),
-            baptized_by: $('input[name="baptized_by"]').val(),
-            godfather: $('input[name="godfather"]').val(),
-            godmother: $('input[name="godmother"]').val()
+            dataId: dataId,
+            reason: $('#reason_' + dataId).val(),
+            remarks: $('textarea[name="remarks"]').val()
         },
         success: function(response) {
             console.log('AJAX Success:', response);
             if (response.trim() === 'success') {
-                alert('The application approved successfully!');
+                alert('The application declined successfully!');
+                alert('Please Visit Decline tab For Sending Decline Email Thank You');
+                sendDeclineEmail(dataId);
                 location.reload();
             } else {
-                alert('Failed to approve the application. Please try again.');
+                alert('Failed to decline the application. Please try again.');
+                location.reload();
             }
         },
         error: function(xhr, status, error) {
@@ -1061,35 +1183,6 @@ function approveBinyagRequestCertificate(itemId) {
 }
 </script>
 
-<script>
-function declineBinyagRequestCertificate(dataId) {
-    console.log('Item ID:', dataId);
-    $.ajax({
-        type: 'POST',
-        url: 'certificate_baptismal_decline.php',
-        data: {
-            dataId: dataId,
-            reason: $('#reason_' + dataId).val(),
-            otherReason: $('#otherReason_' + dataId).val(),
-            remarks: $('textarea[name="remarks"]').val()
-        },
-        success: function(response) {
-            console.log('AJAX Success:', response);
-            if (response.trim() === 'success') {
-                alert('The application declined successfully!');
-                location.reload();
-            } else {
-                alert('Failed to decline the application. Please try again.');
-                // alert('binyag_request_certificate declined successfully!');
-                location.reload();
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', status, error);
-        }
-    });
-}
-</script>
 
 <script>
 function sendcompleteEmailAndComplete(itemId) {

@@ -58,7 +58,7 @@ function getTimeAgo($timestamp) {
 
 function getMassData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM notification ORDER BY date_added DESC";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM notification ORDER BY date_added DESC";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);

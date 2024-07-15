@@ -25,7 +25,7 @@ $row = mysqli_fetch_assoc($result);
 <?php 
 function getMassData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 3";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -37,7 +37,7 @@ $mass = getMassData();
 <?php 
 function getWeddingData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding WHERE status_id = 3";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -49,7 +49,7 @@ $wedding = getWeddingData();
 <?php 
     function getBaptismalData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag WHERE status_id = 3";
     $Baptismal = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -62,7 +62,7 @@ $wedding = getWeddingData();
 <?php 
     function getBlessingData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM blessing WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM blessing WHERE status_id = 3";
     $Blessing = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -74,7 +74,7 @@ $wedding = getWeddingData();
 <?php 
     function getFuneralData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM funeral WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM funeral WHERE status_id = 3";
     $complete = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -86,7 +86,7 @@ $wedding = getWeddingData();
 <?php 
     function getSickcallData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall WHERE status_id = 3";
     $complete = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -556,7 +556,7 @@ $wedding = getWeddingData();
                                     <td class="text-center align-middle"><?php echo $completebaptismal['months']; ?>
                                     </td>
                                     <td class="text-center align-middle">
-                                        <?php echo $completebaptismal['current_address']; ?>
+                                        <?php echo $completebaptismal['complete_address']; ?>
                                     </td>
                                     <td class="text-center align-middle"><?php echo $completebaptismal['birthplace']; ?>
                                     </td>
@@ -640,9 +640,9 @@ $wedding = getWeddingData();
 
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="current_address">Current Address:</label>
+                                                        <label for="complete_address">Current Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completebaptismal["current_address"] ?>"
+                                                            value="<?= $completebaptismal["complete_address"] ?>"
                                                             disabled>
                                                     </div>
                                                 </div>
@@ -932,9 +932,9 @@ $wedding = getWeddingData();
 
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="current_address">Current Address:</label>
+                                                        <label for="complete_address">Current Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completefuneral["current_address"] ?>" disabled>
+                                                            value="<?= $completefuneral["complete_address"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
@@ -1587,5 +1587,11 @@ li a:hover {
 
 tr {
     text-align: center !important;
+}
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
 }
 </style>

@@ -28,9 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["groupId"])) {
 
     $groupId = $_POST["groupId"];
 
-    $sql = "SELECT o.*, l.email AS user_email FROM `orders` AS o
-            INNER JOIN `login` AS l ON o.customer_id = l.id
-            WHERE o.`group_order` = ?";
+    $sql = "SELECT o.*, l.email AS user_email, l.first_name AS user_first_name FROM `orders` AS o
+    INNER JOIN `login` AS l ON o.customer_id = l.id
+    WHERE o.`group_order` = ?";
     $stmt = mysqli_prepare($conn, $sql);
     if ($stmt === false) {
         echo "Error: Unable to prepare statement. " . mysqli_error($conn);
@@ -85,10 +85,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["groupId"])) {
                     <img src="https://res.cloudinary.com/dqtbveriz/image/upload/v1711791868/logo_white_lio37e.png" alt="Sample Logo" style="display: inline-block; max-width: 200px;">
                 </div>
                 <h2 style="color: #333333; font-size: 24px; font-weight: bold; text-align: center;"></h2>
-                <p style="font-size: 16px;"><strong>Dear</strong> </p>
-                <p style="font-size: 16px;"><strong>We are pleased to inform you that your Order with ' . $row["group_order"] . ' is on the way to your location.</strong></p>
-                <p style="font-size: 16px;"><strong> please be ready to pay the exact amount of ' . $row["grandtotal"] . ' Thank You...</strong></p>
-                <p style="font-size: 16px;"><strong>' . $auth_firstname . '</p>
+                <p style="font-size: 16px;"><strong>Hi! </strong> ' . $row["user_first_name"] . ' </p>
+                <p style="font-size: 16px;"><strong>Great news! Your order ' . $row["group_order"] . ' has been shipped via J&T Express. Keep an eye out for delivery or pickup instructions.</strong></p>
+                <p style="font-size: 16px;"><strong> Tracking number:  ' . $row["trackingNumber"] . '<br> You can track your order <a href="https://www.jtexpress.ph/trajectoryQuery?flag=1">here</a>.</strong></p>
+                <p style="font-size: 16px;"><strong>Regards,</p>
                 <p style="font-size: 16px;">ICP</p>';
 
             // Send the email

@@ -23,7 +23,7 @@ if (!isset($_SESSION['auth_admin'])) {
     
     function getInventory() {
         global $pdo;
-        $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM inventory";
+        $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM inventory";
         $inventory = [];
         $statement = $pdo->prepare($query);
         $statement->execute();
@@ -240,27 +240,31 @@ $(document).ready(function() {
                             <tbody>
                                 <?php foreach ($inventory as $item) { ?>
                                 <tr>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <div class="d-flex align-items-center">
                                             <div class="">
                                                 <p class="fw-bold mb-1"><?php echo $item['product_id']; ?></p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <img src="image/<?php echo $item['product_image']; ?>" width="60" height="80"
                                             alt="<?php echo $item['product_name']; ?>">
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <p class="fw-bold fw-normal mb-1"><?php echo $item['product_name']; ?></p>
                                     </td>
-                                    <td class="text-center align-middle"><?php echo $item['product_description']; ?>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_description']; ?>
                                     </td>
-                                    <td class="text-center align-middle">₱
+                                    <td class="text-left align-middle">
+                                        ₱
                                         <?php echo number_format($item['product_price'], 2); ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_dimension']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_stock']; ?></td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_dimension']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_stock']; ?></td>
+                                    <td class="text-left align-middle">
                                         <div class="">
                                             <span class=""><?php echo $item['date_component']; ?></span>
                                             <p class="time text-muted mb-0">
@@ -268,14 +272,14 @@ $(document).ready(function() {
                                             </p>
                                         </div>
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <span
                                             class="badge badge-<?php echo $item['status'] == 'Available' ? 'success' : ($item['status'] == 'Out of Stock' ? 'danger' : 'warning'); ?> rounded-pill d-inline"
                                             id="status_<?php echo $item['product_id']; ?>">
                                             <?php echo $item['status']; ?>
                                         </span>
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <button class="btn-sm btn-info btn-block mb-2" data-toggle="modal"
                                             data-target="#view_<?php echo $item['product_id']; ?>">
                                             <i class="fas fa-pencil-alt"></i> Update
@@ -328,27 +332,36 @@ $(document).ready(function() {
                                 <?php foreach ($inventory as $item) { ?>
                                 <?php if ($item['status'] == 'Available') { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $item['product_id']; ?></td>
-                                    <td class="text-center align-middle"><img
-                                            src="image/<?php echo $item['product_image']; ?>" width="60" height="80"
-                                            alt="<?php echo $item['product_name']; ?>"></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_description']; ?>
+                                    <td class="text-left align-middle">
+
+                                        <?php echo $item['product_id']; ?></td>
+                                    <td class="text-left align-middle">
+
+                                        <img src="image/<?php echo $item['product_image']; ?>" width="60" height="80"
+                                            alt="<?php echo $item['product_name']; ?>">
                                     </td>
-                                    <td class="text-center align-middle">₱
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_name']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_description']; ?>
+                                    </td>
+                                    <td class="text-left align-middle">
+                                        ₱
                                         <?php echo number_format($item['product_price'], 2); ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_dimension']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_stock']; ?></td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_dimension']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_stock']; ?></td>
+                                    <td class="text-left align-middle">
                                         <?php echo $item['date_component'] . ' ' . $item['time_component']; ?></td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <span
                                             class="badge badge-<?php echo $item['status'] == 'Available' ? 'success' : ($item['status'] == 'Out of Stock' ? 'danger' : 'warning'); ?> rounded-pill d-inline"
                                             id="status_<?php echo $item['product_id']; ?>">
                                             <?php echo $item['status']; ?>
                                         </span>
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <button class="btn-sm btn-info btn-block mb-2" data-toggle="modal"
                                             data-target="#view_<?php echo $item['product_id']; ?>">
                                             <i class="fas fa-pencil-alt"></i> Update
@@ -403,27 +416,34 @@ $(document).ready(function() {
                                 <?php foreach ($inventory as $item) { ?>
                                 <?php if ($item['status'] == 'Out of Stock') { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $item['product_id']; ?></td>
-                                    <td class="text-center align-middle"><img
-                                            src="image/<?php echo $item['product_image']; ?>" width="60" height="80"
-                                            alt="<?php echo $item['product_name']; ?>"></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_description']; ?>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_id']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <img src="image/<?php echo $item['product_image']; ?>" width="60" height="80"
+                                            alt="<?php echo $item['product_name']; ?>">
                                     </td>
-                                    <td class="text-center align-middle">₱
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_name']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_description']; ?>
+                                    </td>
+                                    <td class="text-left align-middle">
+                                        ₱
                                         <?php echo number_format($item['product_price'], 2); ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_dimension']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_stock']; ?></td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_dimension']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_stock']; ?></td>
+                                    <td class="text-left align-middle">
                                         <?php echo $item['date_component'] . ' ' . $item['time_component']; ?></td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <span
                                             class="badge badge-<?php echo $item['status'] == 'Available' ? 'success' : ($item['status'] == 'Out of Stock' ? 'danger' : 'warning'); ?> rounded-pill d-inline"
                                             id="status_<?php echo $item['product_id']; ?>">
                                             <?php echo $item['status']; ?>
                                         </span>
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <button class="btn-sm btn-info btn-block mb-2" data-toggle="modal"
                                             data-target="#view_<?php echo $item['product_id']; ?>">
                                             <i class="fas fa-pencil-alt"></i> Update
@@ -477,27 +497,34 @@ $(document).ready(function() {
                                 <?php foreach ($inventory as $item) { ?>
                                 <?php if ($item['status'] == 'Unlisted') { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $item['product_id']; ?></td>
-                                    <td class="text-center align-middle"><img
-                                            src="image/<?php echo $item['product_image']; ?>" width="60" height="80"
-                                            alt="<?php echo $item['product_name']; ?>"></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_description']; ?>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_id']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <img src="image/<?php echo $item['product_image']; ?>" width="60" height="80"
+                                            alt="<?php echo $item['product_name']; ?>">
                                     </td>
-                                    <td class="text-center align-middle">₱
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_name']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_description']; ?>
+                                    </td>
+                                    <td class="text-left align-middle">
+                                        ₱
                                         <?php echo number_format($item['product_price'], 2); ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_dimension']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['product_stock']; ?></td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_dimension']; ?></td>
+                                    <td class="text-left align-middle">
+                                        <?php echo $item['product_stock']; ?></td>
+                                    <td class="text-left align-middle">
                                         <?php echo $item['date_component'] . ' ' . $item['time_component']; ?></td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <span
                                             class="badge badge-<?php echo $item['status'] == 'Available' ? 'success' : ($item['status'] == 'Out of Stock' ? 'danger' : 'warning'); ?> rounded-pill d-inline"
                                             id="status_<?php echo $item['product_id']; ?>">
                                             <?php echo $item['status']; ?>
                                         </span>
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-left align-middle">
                                         <button class="btn-sm btn-info btn-block mb-2" data-toggle="modal"
                                             data-target="#view_<?php echo $item['product_id']; ?>">
                                             <i class="fas fa-pencil-alt"></i> Update
@@ -649,7 +676,8 @@ $(document).ready(function() {
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="saveCoupoBtn"><i class="fas fa-save"></i> Save</button>
+                    <button type="button" class="btn btn-primary" id="saveCoupoBtn"><i class="fas fa-save"></i>
+                        Save</button>
                 </div>
             </div>
         </div>
@@ -682,7 +710,7 @@ $(document).ready(function() {
         });
     }
     </script>
-    
+
 
     <!-- EDIT Modal form -->
     <?php foreach ($inventory as $item) { ?>
@@ -833,6 +861,13 @@ a {
 .nav-links {
     border-top-left-radius: 1.5rem;
     border-top-right-radius: 0.5rem;
+}
+
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
 }
 </style>
 <script>

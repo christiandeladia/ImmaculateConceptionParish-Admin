@@ -30,26 +30,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $notificationResult = mysqli_stmt_execute($stmt);
 
                 if ($notificationResult) {
-                    // Notification inserted successfully
-                    echo 'success';
+                    // Delete the record in the schedule table with the same reference_id
+                    $deleteScheduleQuery = "DELETE FROM schedule WHERE reference_id = ?";
+                    $stmt = mysqli_prepare($conn, $deleteScheduleQuery);
+                    mysqli_stmt_bind_param($stmt, "s", $row['reference_id']);
+                    $deleteScheduleResult = mysqli_stmt_execute($stmt);
+
+                    if ($deleteScheduleResult) {
+                        echo 'success';
+                    } else {
+                        echo 'Error deleting schedule record.';
+                    }
                 } else {
                     // Error inserting notification
-                    echo 'error inserting notification';
+                    ?>
+                    <script>
+                        console.error('error inserting notification');
+                    </script>
+                    <?php
                 }
             } else {
                 // Error updating record
-                echo 'error updating record';
+                ?>
+                <script>
+                    console.error('error updating record');
+                </script>
+                <?php
             }
         } else {
             // Error fetching record
-            echo 'error fetching record';
+            ?>
+            <script>
+                console.error('error fetching record');
+            </script>
+            <?php
         }
     } else {
         // DataId is not set
-        echo 'error: dataId is not set';
+        ?>
+        <script>
+            console.error('connection lost!');
+            header("Location: blessing.php");
+            exit();
+        </script>
+        <?php
     }
 } else {
     // Invalid request method
-    echo 'error: invalid request method';
+    ?>
+    <script>
+        console.error('error: invalid request method');
+    </script>
+    <?php
 }
 ?>

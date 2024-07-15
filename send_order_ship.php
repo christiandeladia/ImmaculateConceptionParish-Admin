@@ -79,17 +79,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["groupId"])) {
             $auth_firstname = isset($_SESSION['auth_admin']['firstname']) ? $_SESSION['auth_admin']['firstname'] : '';
 
             // Set email subject and body
-            $mail->Subject = 'Order has been Approved';
+            $mail->Subject = 'Your order ' . $row["group_order"] . ' is ready to ship';
             $mail->Body = '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(#93C572, #FFFFFF);">
                 <div style="background-color: #008000; text-align: center; padding: 10px;">
                     <img src="https://res.cloudinary.com/dqtbveriz/image/upload/v1711791868/logo_white_lio37e.png" alt="Sample Logo" style="display: inline-block; max-width: 200px;">
                 </div>
                 <h2 style="color: #333333; font-size: 24px; font-weight: bold; text-align: center;"></h2>
-                <p style="font-size: 16px;"><strong>Dear</strong> </p>
-                <p style="font-size: 16px;"><strong>We are pleased to inform you that your Order with ' . $row["group_order"] . ' has been Completed.</strong></p>
-                <p style="font-size: 16px;"><strong>Your request has been shipped with careful consideration, and please be ready to pay the exact amount of ' . $row["grandtotal"] . ' Thank You...</strong></p>
-                <p style="font-size: 16px;"><strong>' . $auth_firstname . '</p>
-                <p style="font-size: 16px;">ICP</p>';
+                <p style="font-size: 16px;">Hi ' . $row["order_username"] . ',</p><br><br>
+                <p style="font-size: 16px;">Your Order ' . $row["group_order"] . ' is ready to ship.</p><br><br><br>
+                <p style="font-size: 16px;">We are preparing your order and will hand it over to our carrier for shipping. Please be prepared to pay the exact amount of ' . $row["grandtotal"] . ' Thank You...</p>
+                <p style="font-size: 16px;">' . $auth_firstname . '</p>
+                <p style="font-size: 16px;">ICP Team</p>';
 
             // Send the email
             if ($mail->send()) {

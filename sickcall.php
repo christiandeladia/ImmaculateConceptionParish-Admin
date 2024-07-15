@@ -10,7 +10,7 @@ if (!isset($_SESSION['auth_admin'])) {
 		$auth = $_SESSION['auth_login'];
         $auth_full_name = $auth['first_name'] . $auth['last_name'];
 }
-$result = mysqli_query($conn, "SELECT * FROM sickcall ORDER BY id DESC LIMIT 1");
+$result = mysqli_query($conn, "SELECT * FROM sickcall ORDER BY id ASC LIMIT 1");
 
 if (!$result) {
     die("Error in query: " . mysqli_error($conn));
@@ -22,7 +22,7 @@ $row = mysqli_fetch_assoc($result);
 <?php 
 function getsickcallData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall ORDER BY id ASC";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -170,6 +170,12 @@ li a:hover {
 tr {
     text-align: center !important;
 }
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
+}
 </style>
 
 <body>
@@ -238,7 +244,8 @@ tr {
                 <div class="tab-content custom-tab-content" id="nav-tabContent">
 
                     <!-- PROCESS TAB___________________________________________________________________________________ -->
-                    <div class="tab-pane fade show active" id="nav-process" role="tabpanel" aria-labelledby="nav-process-tab">
+                    <div class="tab-pane fade show active" id="nav-process" role="tabpanel"
+                        aria-labelledby="nav-process-tab">
                         <br>
                         <!-- PROCESS TABLE -->
                         <table id="dataTableProcess" class="table table-striped table-responsive-lg" cellspacing="0"
@@ -248,21 +255,21 @@ tr {
 
                                     <th>Reference ID</th>
                                     <th>Patients Name</th>
-                                    <th>Illness</th>
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Date Applied</th>
+                                    <th>Urgent</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $item) { 
+                                <?php foreach ($inventory as $item) { 
                              if ($item['status_id'] == 1) { ?>
                                 <tr>
                                     <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['patients_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['illness']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['date']; ?>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('M d, Y', strtotime($item["date"])); ?>
                                     </td>
                                     <td class="text-center align-middle">
                                         <?php echo $item['time']; ?></td>
@@ -273,6 +280,13 @@ tr {
                                                 <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <span
+                                            class="badge <?php echo ($item['urgent'] === 'Yes') ? 'badge-danger' : 'badge-success'; ?>"
+                                            style='border-radius: 15px; padding: 5px;'>
+                                            <?php echo $item['urgent']; ?>
+                                        </span>
                                     </td>
                                     <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
@@ -299,6 +313,16 @@ tr {
                                             <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
+                                                        <label for="patients_name">Urgent?</label>
+                                                        <span
+                                                            class="badge <?php echo ($item['urgent'] === 'Yes') ? 'badge-danger' : 'badge-success'; ?>"
+                                                            style='border-radius: 15px; padding: 5px;'>
+                                                            <?php echo $item['urgent']; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
                                                         <label for="patients_name">Patient's Name:</label>
                                                         <input type="text" class="form-control"
                                                             value="<?= $item["patients_name"] ?>" disabled>
@@ -311,21 +335,9 @@ tr {
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="address">Address:</label>
+                                                        <label for="complete_address">Complete Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["address"] ?>" disabled>
-                                                    </div>
-                                                </div>
-                                                <div class="form-row">
-                                                    <div class="form-group col-md">
-                                                        <label for="hospital">Hospital:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $item["hospital"] ?>" disabled>
-                                                    </div>
-                                                    <div class="form-group col-md">
-                                                        <label for="room_number">Room Number:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $item["room_number"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
@@ -361,7 +373,8 @@ tr {
                                                     <div class="form-group col-md">
                                                         <label for="date">Date:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["date"] ?>" disabled>
+                                                            value="<?= date('M d, Y', strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="time">Time:</label>
@@ -395,17 +408,17 @@ tr {
                     </div>
 
                     <!-- MODAL DECLINE -->
-                    <?php foreach ($inventory as $declineItem) { 
-                             if ($declineItem['status_id'] == 1) { ?>
-                    <div class="modal fade" id="declineModal_<?php echo $declineItem['id']; ?>" tabindex="-1"
-                        role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 1) { ?>
+                    <div class="modal fade" id="declineModal_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 1000px">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="exampleModalLongTitle">
                                         REASON OF DECLINING
                                         (ID:
-                                        <?php echo $declineItem['reference_id']; ?>)</h5>
+                                        <?php echo $item['reference_id']; ?>)</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -415,8 +428,8 @@ tr {
                                         <div class="form-row">
                                             <div class="form-group col-md">
                                                 <label for="reason">Reason:</label>
-                                                <select class="form-control"
-                                                    id="reason_<?php echo $declineItem['id']; ?>" name="reason">
+                                                <select class="form-control" id="reason_<?php echo $item['id']; ?>"
+                                                    name="reason">
                                                     <option value="Incomplete or Inaccurate Information">
                                                         Incomplete or Inaccurate Information
                                                     </option>
@@ -444,6 +457,7 @@ tr {
                                                     <option value="Others">Others</option>
                                                 </select>
                                             </div>
+                                            <input type="hidden" class="form-control" name="<?= $item["id"] ?>">
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group col-md">
@@ -457,7 +471,7 @@ tr {
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Cancel</button>
                                         <button type="submit" class="btn btn-success"
-                                            onclick="declineSickcall(<?php echo $declineItem['id']; ?>)">OK</button>
+                                            onclick="declineSickcall(<?php echo $item['id']; ?>)">OK</button>
                                     </div>
                                 </form>
                             </div>
@@ -477,21 +491,22 @@ tr {
                                 <tr>
                                     <th>Reference ID</th>
                                     <th>Patients Name</th>
-                                    <th>Illness</th>
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Date Applied</th>
+                                    <th>Urgent</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $item) { 
+                                <?php foreach ($inventory as $item) { 
                              if ($item['status_id'] == 2) { ?>
                                 <tr>
                                     <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['patients_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['illness']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['date']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('M d, Y', strtotime($item["date"])); ?>
+                                    </td>
                                     <td class="text-center align-middle"><?php echo $item['time']; ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
@@ -500,6 +515,13 @@ tr {
                                                 <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <span
+                                            class="badge <?php echo ($item['urgent'] === 'Yes') ? 'badge-danger' : 'badge-success'; ?>"
+                                            style='border-radius: 15px; padding: 5px;'>
+                                            <?php echo $item['urgent']; ?>
+                                        </span>
                                     </td>
                                     <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
@@ -527,6 +549,16 @@ tr {
                                             <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
+                                                        <label for="patients_name">Urgent?</label>
+                                                        <span
+                                                            class="badge <?php echo ($item['urgent'] === 'Yes') ? 'badge-danger' : 'badge-success'; ?>"
+                                                            style='border-radius: 15px; padding: 5px;'>
+                                                            <?php echo $item['urgent']; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
                                                         <label for="patients_name">Patient's Name:</label>
                                                         <input type="text" class="form-control"
                                                             value="<?= $item["patients_name"] ?>" disabled>
@@ -539,21 +571,9 @@ tr {
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="address">Address:</label>
+                                                        <label for="complete_address">Complete Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["address"] ?>" disabled>
-                                                    </div>
-                                                </div>
-                                                <div class="form-row">
-                                                    <div class="form-group col-md">
-                                                        <label for="hospital">Hospital:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $item["hospital"] ?>" disabled>
-                                                    </div>
-                                                    <div class="form-group col-md">
-                                                        <label for="room_number">Room Number:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $item["room_number"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
@@ -589,7 +609,8 @@ tr {
                                                     <div class="form-group col-md">
                                                         <label for="date">Date:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["date"] ?>" disabled>
+                                                            value="<?= date('M d, Y', strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="time">Time:</label>
@@ -597,7 +618,7 @@ tr {
                                                             value="<?= $item["time"] ?>" disabled>
                                                     </div>
                                                 </div>
-                                            
+
 
                                             </div>
                                             <div class="modal-footer">
@@ -628,47 +649,55 @@ tr {
                                 <tr>
                                     <th>Reference ID</th>
                                     <th>Patients Name</th>
-                                    <th>Illness</th>
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Date Applied</th>
+                                    <th>Urgent</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($inventory as $completeitem) { 
-                             if ($completeitem['status_id'] == 3) { ?>
+                                <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 3) { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $completeitem['reference_id']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['patients_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['illness']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['date']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['time']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['patients_name']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('M d, Y', strtotime($item["date"])); ?>
+                                    </td>
+                                    <td class="text-center align-middle"><?php echo $item['time']; ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
-                                            <span class=""><?php echo $completeitem['date_component']; ?></span>
+                                            <span class=""><?php echo $item['date_component']; ?></span>
                                             <p class="time text-muted mb-0">
-                                                <?php echo $completeitem['time_component']; ?></span>
+                                                <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
                                     </td>
                                     <td class="text-center align-middle">
+                                        <span
+                                            class="badge <?php echo ($item['urgent'] === 'Yes') ? 'badge-danger' : 'badge-success'; ?>"
+                                            style='border-radius: 15px; padding: 5px;'>
+                                            <?php echo $item['urgent']; ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                            data-target="#view_<?php echo $completeitem['id']; ?>">
+                                            data-target="#view_<?php echo $item['id']; ?>">
                                             <i class="fas fa-eye"></i>View
                                         </button>
                                     </td>
                                 </tr>
 
                                 <!-- MODAL APPLICATION -->
-                                <div class="modal fade" id="view_<?php echo $completeitem['id']; ?>" tabindex="-1"
-                                    role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document"
                                         style="max-width: 1000px">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                    <?php echo $completeitem['reference_id']; ?>)</h5>
+                                                    <?php echo $item['reference_id']; ?>)</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -678,74 +707,73 @@ tr {
                                             <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
+                                                        <label for="patients_name">Urgent?</label>
+                                                        <span
+                                                            class="badge <?php echo ($item['urgent'] === 'Yes') ? 'badge-danger' : 'badge-success'; ?>"
+                                                            style='border-radius: 15px; padding: 5px;'>
+                                                            <?php echo $item['urgent']; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
                                                         <label for="patients_name">Patient's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["patients_name"] ?>" disabled>
+                                                            value="<?= $item["patients_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="age">Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["age"] ?>" disabled>
+                                                            value="<?= $item["age"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="address">Address:</label>
+                                                        <label for="complete_address">Complete Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["address"] ?>" disabled>
-                                                    </div>
-                                                </div>
-                                                <div class="form-row">
-                                                    <div class="form-group col-md">
-                                                        <label for="hospital">Hospital:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $completeitem["hospital"] ?>" disabled>
-                                                    </div>
-                                                    <div class="form-group col-md">
-                                                        <label for="room_number">Room Number:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $completeitem["room_number"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="illness">Illness:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["illness"] ?>" disabled>
+                                                            value="<?= $item["illness"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="can_eat">Can Eat:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["can_eat"] ?>" disabled>
+                                                            value="<?= $item["can_eat"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="can_speak">Can Speak:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["can_speak"] ?>" disabled>
+                                                            value="<?= $item["can_speak"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="contact_number">Contact Number:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["contact_number"] ?>" disabled>
+                                                            value="<?= $item["contact_number"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="contact_person">Contact Person:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["contact_person"] ?>" disabled>
+                                                            value="<?= $item["contact_person"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="date">Date:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["date"] ?>" disabled>
+                                                            value="<?= date('M d, Y', strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="time">Time:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["time"] ?>" disabled>
+                                                            value="<?= $item["time"] ?>" disabled>
                                                     </div>
                                                 </div>
                                             </div>
@@ -764,7 +792,7 @@ tr {
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- DECLINE TAB -->
                     <div class="tab-pane fade" id="nav-decline" role="tabpanel" aria-labelledby="nav-decline-tab">
                         <table id="dataTableDecline" class="table table-striped table-responsive-lg" cellspacing="0"
@@ -773,49 +801,55 @@ tr {
                                 <tr>
                                     <th>Reference ID</th>
                                     <th>Patients Name</th>
-                                    <th>Illness</th>
                                     <th>Reason</th>
                                     <th>Remarks</th>
                                     <th>Date Applied</th>
+                                    <th>Urgent</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $itemdecline) { 
-                             if ($itemdecline['status_id'] == 4) { ?>
+                                <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 4) { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['reference_id']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['patients_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['illness']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['reason']; ?>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['patients_name']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['reason']; ?>
                                     </td>
                                     <td class="text-center align-middle">
-                                        <?php echo $itemdecline['remarks']; ?></td>
+                                        <?php echo $item['remarks']; ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
-                                            <span class=""><?php echo $itemdecline['date_component']; ?></span>
+                                            <span class=""><?php echo $item['date_component']; ?></span>
                                             <p class="time text-muted mb-0">
-                                                <?php echo $itemdecline['time_component']; ?></span>
+                                                <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
                                     </td>
                                     <td class="text-center align-middle">
+                                        <span
+                                            class="badge <?php echo ($item['urgent'] === 'Yes') ? 'badge-danger' : 'badge-success'; ?>"
+                                            style='border-radius: 15px; padding: 5px;'>
+                                            <?php echo $item['urgent']; ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                            data-target="#view_<?php echo $itemdecline['id']; ?>">
+                                            data-target="#view_<?php echo $item['id']; ?>">
                                             <i class="fas fa-eye"></i>View
                                         </button>
                                     </td>
                                 </tr>
 
                                 <!-- MODAL APPLICATION -->
-                                <div class="modal fade" id="view_<?php echo $itemdecline['id']; ?>" tabindex="-1"
-                                    role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document"
                                         style="max-width: 1000px">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                    <?php echo $itemdecline['reference_id']; ?>)</h5>
+                                                    <?php echo $item['reference_id']; ?>)</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -823,89 +857,79 @@ tr {
                                             </div>
 
                                             <div class="modal-body">
-                                            <p style="color: red;">Decline because of <?php echo $itemdecline['reason']; ?></p>
+                                                <p style="color: red;">Decline because of <?php echo $item['reason']; ?>
+                                                </p>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="patients_name">Patient's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["patients_name"] ?>" disabled>
+                                                            value="<?= $item["patients_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="age">Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["age"] ?>" disabled>
+                                                            value="<?= $item["age"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="address">Address:</label>
+                                                        <label for="complete_address">Complete Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["address"] ?>" disabled>
-                                                    </div>
-                                                </div>
-                                                <div class="form-row">
-                                                    <div class="form-group col-md">
-                                                        <label for="hospital">Hospital:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["hospital"] ?>" disabled>
-                                                    </div>
-                                                    <div class="form-group col-md">
-                                                        <label for="room_number">Room Number:</label>
-                                                        <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["room_number"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="illness">Illness:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["illness"] ?>" disabled>
+                                                            value="<?= $item["illness"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="can_eat">Can Eat:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["can_eat"] ?>" disabled>
+                                                            value="<?= $item["can_eat"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="can_speak">Can Speak:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["can_speak"] ?>" disabled>
+                                                            value="<?= $item["can_speak"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="contact_number">Contact Number:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["contact_number"] ?>" disabled>
+                                                            value="<?= $item["contact_number"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="contact_person">Contact Person:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["contact_person"] ?>" disabled>
+                                                            value="<?= $item["contact_person"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="date">Date:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["date"] ?>" disabled>
+                                                            value="<?= date('M d, Y', strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="time">Time:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["time"] ?>" disabled>
+                                                            value="<?= $item["time"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="reason">Reason:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["reason"] ?>" disabled>
+                                                            value="<?= $item["reason"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="remarks">Remarks:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["remarks"] ?>" disabled>
+                                                            value="<?= $item["remarks"] ?>" disabled>
                                                     </div>
                                                 </div>
                                             </div>
@@ -986,7 +1010,6 @@ function approveSickcall(itemId) {
 </script>
 
 <script>
-
 function declineSickcall(dataId) {
     console.log('Item ID:', dataId);
     $.ajax({
@@ -1001,7 +1024,6 @@ function declineSickcall(dataId) {
             console.log('AJAX Success:', response);
             if (response.trim() === 'success') {
                 alert('The application declined successfully!');
-                alert('Please Visit Decline tab For Sending Decline Email Thank You');
                 sendDeclineEmail(dataId);
                 location.reload();
             } else {
@@ -1014,6 +1036,7 @@ function declineSickcall(dataId) {
         }
     });
 }
+
 function sendDeclineEmail(dataId) {
     $.ajax({
         type: 'GET',

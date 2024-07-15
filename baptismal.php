@@ -26,7 +26,7 @@ $row = mysqli_fetch_assoc($result);
 <?php 
 function getbinyagData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag ORDER BY id DESC";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -254,14 +254,15 @@ tr {
                                     <th>Reference ID</th>
                                     <th>Child's Name</th>
                                     <th>Months</th>
-                                    <th>Address</th>
-                                    <th>Birthplace</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
                                     <th>Date Applied</th>
+                                    <th>Type</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $item) { 
+                                <?php foreach ($inventory as $item) { 
                              if ($item['status_id'] == 1) { ?>
                                 <tr>
                                     <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
@@ -269,8 +270,10 @@ tr {
                                         <?php echo $item['child_first_name']; ?>
                                         <?php echo $item['mother_maiden_lastname']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['months']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['current_address']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['birthplace']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:i A', strtotime($item['time'])); ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
                                             <span class=""><?php echo $item['date_component']; ?></span>
@@ -278,6 +281,18 @@ tr {
                                                 <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <?php
+                                            $date = $item['date'];
+                                            $dayOfWeek = date('w', strtotime($date)); 
+                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                        ?>
+                                        <span class="badge <?php echo $badgeClass; ?>"
+                                            style='border-radius: 15px; padding: 7px;'>
+                                            <?php echo $badgeText; ?>
+                                        </span>
                                     </td>
                                     <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
@@ -302,7 +317,22 @@ tr {
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                    
+
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="child_first_name">Type:</label>
+                                                        <?php
+                                                            $date = $item['date'];
+                                                            $dayOfWeek = date('w', strtotime($date)); 
+                                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                                        ?>
+                                                        <span class="badge <?php echo $badgeClass; ?>"
+                                                            style='border-radius: 15px; padding: 7px;'>
+                                                            <?php echo $badgeText; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="child_first_name">Child's First Name:</label>
@@ -325,9 +355,9 @@ tr {
                                                     <div class="form-group col-md">
                                                         <label for="birthdate">Birthdate:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["birthdate"] ?>" disabled>
+                                                            value="<?= date('F j, Y', strtotime($item['birthdate'])) ?>" disabled>
                                                     </div>
-                                                    
+
                                                     <div class="form-group col-md">
                                                         <label for="birthplace">Birthplace:</label>
                                                         <input type="text" class="form-control"
@@ -339,23 +369,52 @@ tr {
                                                             value="<?= $item["months"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_date">Baptismal Date:</label>
+                                                        <label for="date">Baptismal Date:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("F j, Y", strtotime($item["baptismal_date"])) ?>" disabled>
+                                                            value="<?= date("F j, Y", strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_time">Baptismal Time:</label>
+                                                        <label for="time">Baptismal Time:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("h:i A", strtotime($item["baptismal_time"])) ?>" disabled>
+                                                            value="<?= date("h:i A", strtotime($item["time"])) ?>"
+                                                            disabled>
                                                     </div>
                                                 </div>
 
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="current_address">Current Address:</label>
+                                                        <label for="complete_address">Current Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["current_address"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
@@ -380,7 +439,7 @@ tr {
                                                             value="<?= $item["mother_origin_place"] ?>" disabled>
                                                     </div>
                                                 </div>
-                                             
+
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="marriage">Marriage:</label>
@@ -527,17 +586,17 @@ tr {
                     </div>
 
                     <!-- MODAL DECLINE -->
-                    <?php foreach ($inventory as $declineItem) { 
-                             if ($declineItem['status_id'] == 1) { ?>
-                    <div class="modal fade" id="declineModal_<?php echo $declineItem['id']; ?>" tabindex="-1"
-                        role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 1) { ?>
+                    <div class="modal fade" id="declineModal_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 1000px">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="exampleModalLongTitle">
                                         REASON OF DECLINING
                                         (ID:
-                                        <?php echo $declineItem['reference_id']; ?>)</h5>
+                                        <?php echo $item['reference_id']; ?>)</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -547,8 +606,8 @@ tr {
                                         <div class="form-row">
                                             <div class="form-group col-md">
                                                 <label for="reason">Reason:</label>
-                                                <select class="form-control"
-                                                    id="reason_<?php echo $declineItem['id']; ?>" name="reason">
+                                                <select class="form-control" id="reason_<?php echo $item['id']; ?>"
+                                                    name="reason">
                                                     <option value="Incomplete or Inaccurate Information">
                                                         Incomplete or Inaccurate Information
                                                     </option>
@@ -589,7 +648,7 @@ tr {
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Cancel</button>
                                         <button type="submit" class="btn btn-success"
-                                            onclick="declineBinyag(<?php echo $declineItem['id']; ?>)">OK</button>
+                                            onclick="declineBinyag(<?php echo $item['id']; ?>)">OK</button>
                                     </div>
                                 </form>
                             </div>
@@ -610,14 +669,15 @@ tr {
                                     <th>Reference ID</th>
                                     <th>Child's Name</th>
                                     <th>Months</th>
-                                    <th>Address</th>
-                                    <th>Birthplace</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
                                     <th>Date Applied</th>
+                                    <th>Type</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $item) { 
+                                <?php foreach ($inventory as $item) { 
                              if ($item['status_id'] == 2) { ?>
                                 <tr>
                                     <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
@@ -625,8 +685,10 @@ tr {
                                         <?php echo $item['child_first_name']; ?>
                                         <?php echo $item['mother_maiden_lastname']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['months']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['current_address']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['birthplace']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:i A', strtotime($item['time'])); ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
                                             <span class=""><?php echo $item['date_component']; ?></span>
@@ -634,6 +696,18 @@ tr {
                                                 <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <?php
+                                            $date = $item['date'];
+                                            $dayOfWeek = date('w', strtotime($date)); 
+                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                        ?>
+                                        <span class="badge <?php echo $badgeClass; ?>"
+                                            style='border-radius: 15px; padding: 7px;'>
+                                            <?php echo $badgeText; ?>
+                                        </span>
                                     </td>
                                     <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
@@ -661,6 +735,21 @@ tr {
                                             <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
+                                                        <label for="child_first_name">Type:</label>
+                                                        <?php
+                                                            $date = $item['date'];
+                                                            $dayOfWeek = date('w', strtotime($date)); 
+                                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                                        ?>
+                                                        <span class="badge <?php echo $badgeClass; ?>"
+                                                            style='border-radius: 15px; padding: 7px;'>
+                                                            <?php echo $badgeText; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
                                                         <label for="child_first_name">Child's First Name:</label>
                                                         <input type="text" class="form-control"
                                                             value="<?= $item["child_first_name"] ?>" disabled>
@@ -681,7 +770,7 @@ tr {
                                                     <div class="form-group col-md">
                                                         <label for="birthdate">Birthdate:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["birthdate"] ?>" disabled>
+                                                            value="<?= date('F j, Y', strtotime($item['birthdate'])) ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="birthplace">Birthplace:</label>
@@ -694,23 +783,52 @@ tr {
                                                             value="<?= $item["months"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_date">Baptismal Date:</label>
+                                                        <label for="date">Baptismal Date:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("F j, Y", strtotime($item["baptismal_date"])) ?>" disabled>
+                                                            value="<?= date("F j, Y", strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_time">Baptismal Time:</label>
+                                                        <label for="time">Baptismal Time:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("h:i A", strtotime($item["baptismal_time"])) ?>" disabled>
+                                                            value="<?= date("h:i A", strtotime($item["time"])) ?>"
+                                                            disabled>
                                                     </div>
                                                 </div>
 
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="current_address">Current Address:</label>
+                                                        <label for="complete_address">Current Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $item["current_address"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
@@ -886,37 +1004,51 @@ tr {
                                     <th>Reference ID</th>
                                     <th>Child's Name</th>
                                     <th>Months</th>
-                                    <th>Address</th>
-                                    <th>Birthplace</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
                                     <th>Date Applied</th>
+                                    <th>Type</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $completeitem) { 
-                             if ($completeitem['status_id'] == 3) { ?>
+                                <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 3) { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $completeitem['reference_id']; ?>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?>
                                     </td>
                                     <td class="text-center align-middle">
-                                        <?php echo $completeitem['father_lastname']; ?>,
-                                        <?php echo $completeitem['child_first_name']; ?>
-                                        <?php echo $completeitem['mother_maiden_lastname']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['months']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['current_address']; ?>
-                                    </td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['birthplace']; ?></td>
+                                        <?php echo $item['father_lastname']; ?>,
+                                        <?php echo $item['child_first_name']; ?>
+                                        <?php echo $item['mother_maiden_lastname']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['months']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:i A', strtotime($item['time'])); ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
-                                            <span class=""><?php echo $completeitem['date_component']; ?></span>
+                                            <span class=""><?php echo $item['date_component']; ?></span>
                                             <p class="time text-muted mb-0">
-                                                <?php echo $completeitem['time_component']; ?></span>
+                                                <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
                                     </td>
                                     <td class="text-center align-middle">
+                                        <?php
+                                            $date = $item['date'];
+                                            $dayOfWeek = date('w', strtotime($date)); 
+                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                        ?>
+                                        <span class="badge <?php echo $badgeClass; ?>"
+                                            style='border-radius: 15px; padding: 7px;'>
+                                            <?php echo $badgeText; ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                            data-target="#view_<?php echo $completeitem['id']; ?>">
+                                            data-target="#view_<?php echo $item['id']; ?>">
                                             <i class="fas fa-eye"></i>View
                                         </button>
 
@@ -924,14 +1056,14 @@ tr {
                                 </tr>
 
                                 <!-- MODAL APPLICATION -->
-                                <div class="modal fade" id="view_<?php echo $completeitem['id']; ?>" tabindex="-1"
-                                    role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document"
                                         style="max-width: 1000px">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                    <?php echo $completeitem['reference_id']; ?>)</h5>
+                                                    <?php echo $item['reference_id']; ?>)</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -941,69 +1073,111 @@ tr {
                                             <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
+                                                        <label for="child_first_name">Type:</label>
+                                                        <?php
+                                                            $date = $item['date'];
+                                                            $dayOfWeek = date('w', strtotime($date)); 
+                                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                                        ?>
+                                                        <span class="badge <?php echo $badgeClass; ?>"
+                                                            style='border-radius: 15px; padding: 7px;'>
+                                                            <?php echo $badgeText; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
                                                         <label for="child_first_name">Child's First Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["child_first_name"] ?>" disabled>
+                                                            value="<?= $item["child_first_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="mother_maiden_lastname">Mother's Maiden Last
                                                             Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["mother_maiden_lastname"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["mother_maiden_lastname"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="father_lastname">Father's Last Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["father_lastname"] ?>" disabled>
+                                                            value="<?= $item["father_lastname"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="birthdate">Birthdate:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["birthdate"] ?>" disabled>
+                                                            value="<?= date('F j, Y', strtotime($item['birthdate'])) ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="birthplace">Birthplace:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["birthplace"] ?>" disabled>
+                                                            value="<?= $item["birthplace"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="months">Months:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["months"] ?>" disabled>
+                                                            value="<?= $item["months"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_date">Baptismal Date:</label>
+                                                        <label for="date">Baptismal Date:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("F j, Y", strtotime($completeitem["baptismal_date"])) ?>" disabled>
+                                                            value="<?= date("F j, Y", strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_time">Baptismal Time:</label>
+                                                        <label for="time">Baptismal Time:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("h:i A", strtotime($completeitem["baptismal_time"])) ?>" disabled>
+                                                            value="<?= date("h:i A", strtotime($item["time"])) ?>"
+                                                            disabled>
                                                     </div>
                                                 </div>
 
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="current_address">Current Address:</label>
+                                                        <label for="complete_address">Current Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["current_address"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="father_name">Father's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["father_name"] ?>" disabled>
+                                                            value="<?= $item["father_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="father_origin_place">Father's Origin Place:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["father_origin_place"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["father_origin_place"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
@@ -1011,70 +1185,68 @@ tr {
                                                         <label for="mother_maiden_fullname">Mother's Maiden Full
                                                             Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["mother_maiden_fullname"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["mother_maiden_fullname"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="mother_origin_place">Mother's Origin Place:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["mother_origin_place"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["mother_origin_place"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="marriage">Marriage:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["marriage"] ?>" disabled>
+                                                            value="<?= $item["marriage"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="marriage_location">Marriage Location:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["marriage_location"] ?>" disabled>
+                                                            value="<?= $item["marriage_location"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="godfather">Godfather:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godfather"] ?>" disabled>
+                                                            value="<?= $item["godfather"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godfather_age">Godfather's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godfather_age"] ?>" disabled>
+                                                            value="<?= $item["godfather_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godfather_religion">Godfather's Religion:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godfather_religion"] ?>" disabled>
+                                                            value="<?= $item["godfather_religion"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godfather_address">Godfather's Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godfather_address"] ?>" disabled>
+                                                            value="<?= $item["godfather_address"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="godmother">Godmother:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godmother"] ?>" disabled>
+                                                            value="<?= $item["godmother"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godmother_age">Godmother's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godmother_age"] ?>" disabled>
+                                                            value="<?= $item["godmother_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godmother_religion">Godmother's Religion:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godmother_religion"] ?>" disabled>
+                                                            value="<?= $item["godmother_religion"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godmother_address">Godmother's Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["godmother_address"] ?>" disabled>
+                                                            value="<?= $item["godmother_address"] ?>" disabled>
                                                     </div>
                                                 </div>
 
@@ -1082,20 +1254,18 @@ tr {
                                                     <div class="form-group col-md">
                                                         <label for="client_name">Client's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["client_name"] ?>" disabled>
+                                                            value="<?= $item["client_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="client_relationship">Client's Relationship:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["client_relationship"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["client_relationship"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="client_contact_number">Client's Contact
                                                             Number:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["client_contact_number"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["client_contact_number"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
@@ -1103,7 +1273,7 @@ tr {
                                                         <label for="psa_cenomar_photocopy_groom">Copy of Birth
                                                             Certificate:</label>
                                                         <?php
-                                                        $url = $completeitem["copy_birth_certificate"];
+                                                        $url = $item["copy_birth_certificate"];
                                                         $hiddenValue = str_repeat("Birth Certificate", strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1111,12 +1281,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["copy_birth_certificate"] ?>">View</button>
+                                                                    data-url="<?= $item["copy_birth_certificate"] ?>">View</button>
                                                             </div>
                                                         </div>
                                                         <div class="file-path" id="psa_cenomar_photocopy_groom_path"
                                                             style="display: none;">
-                                                            <?= $completeitem["copy_birth_certificate"] ?>
+                                                            <?= $item["copy_birth_certificate"] ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1125,7 +1295,7 @@ tr {
                                                         <label for="copy_marriage_certificate">Copy of Marriage
                                                             Certificate:</label>
                                                         <?php
-                                                        $url = $completeitem["copy_marriage_certificate"];
+                                                        $url = $item["copy_marriage_certificate"];
                                                         $hiddenValue = str_repeat("Marriage Certificate", strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1133,12 +1303,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["copy_marriage_certificate"] ?>">View</button>
+                                                                    data-url="<?= $item["copy_marriage_certificate"] ?>">View</button>
                                                             </div>
                                                         </div>
                                                         <div class="file-path" id="psa_cenomar_photocopy_groom_path"
                                                             style="display: none;">
-                                                            <?= $completeitem["copy_marriage_certificate"] ?>
+                                                            <?= $item["copy_marriage_certificate"] ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1170,48 +1340,61 @@ tr {
                                     <th>Reason</th>
                                     <th>Remarks</th>
                                     <th>Date Applied</th>
+                                    <th>Type</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $itemdecline) { 
-                             if ($itemdecline['status_id'] == 4) { ?>
+                                <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 4) { ?>
                                 <tr>
 
-                                    <td class="text-center align-middle"><?php echo $itemdecline['reference_id']; ?>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?>
                                     </td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['father_lastname']; ?>,
-                                        <?php echo $itemdecline['child_first_name']; ?>
-                                        <?php echo $itemdecline['mother_maiden_lastname']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['months']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['father_lastname']; ?>,
+                                        <?php echo $item['child_first_name']; ?>
+                                        <?php echo $item['mother_maiden_lastname']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['months']; ?></td>
                                     </td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['reason']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['remarks']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['reason']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['remarks']; ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
-                                            <span class=""><?php echo $itemdecline['date_component']; ?></span>
+                                            <span class=""><?php echo $item['date_component']; ?></span>
                                             <p class="time text-muted mb-0">
-                                                <?php echo $itemdecline['time_component']; ?></span>
+                                                <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
                                     </td>
                                     <td class="text-center align-middle">
+                                        <?php
+                                            $date = $item['date'];
+                                            $dayOfWeek = date('w', strtotime($date)); 
+                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                        ?>
+                                        <span class="badge <?php echo $badgeClass; ?>"
+                                            style='border-radius: 15px; padding: 7px;'>
+                                            <?php echo $badgeText; ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                            data-target="#view_<?php echo $itemdecline['id']; ?>">
+                                            data-target="#view_<?php echo $item['id']; ?>">
                                             <i class="fas fa-eye"></i>View
                                         </button>
                                     </td>
                                 </tr>
 
                                 <!-- MODAL APPLICATION -->
-                                <div class="modal fade" id="view_<?php echo $itemdecline['id']; ?>" tabindex="-1"
-                                    role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document"
                                         style="max-width: 1000px">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                    <?php echo $itemdecline['reference_id']; ?>)</h5>
+                                                    <?php echo $item['reference_id']; ?>)</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -1219,71 +1402,115 @@ tr {
                                             </div>
 
                                             <div class="modal-body">
-                                            <p style="color: red;">Decline because of <?php echo $itemdecline['reason']; ?></p>
+                                                <p style="color: red;">Decline because of <?php echo $item['reason']; ?>
+                                                </p>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="child_first_name">Type:</label>
+                                                        <?php
+                                                            $date = $item['date'];
+                                                            $dayOfWeek = date('w', strtotime($date)); 
+                                                            $badgeClass = ($dayOfWeek == 0) ? 'badge-success' : 'badge-danger';
+                                                            $badgeText = ($dayOfWeek == 0) ? 'Regular' : 'Special';
+                                                        ?>
+                                                        <span class="badge <?php echo $badgeClass; ?>"
+                                                            style='border-radius: 15px; padding: 7px;'>
+                                                            <?php echo $badgeText; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="child_first_name">Child's First Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["child_first_name"] ?>" disabled>
+                                                            value="<?= $item["child_first_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="mother_maiden_lastname">Mother's Maiden Last
                                                             Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["mother_maiden_lastname"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["mother_maiden_lastname"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="father_lastname">Father's Last Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["father_lastname"] ?>" disabled>
+                                                            value="<?= $item["father_lastname"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="birthdate">Birthdate:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["birthdate"] ?>" disabled>
+                                                            value="<?= date('F j, Y', strtotime($item['birthdate'])) ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="birthplace">Birthplace:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["birthplace"] ?>" disabled>
+                                                            value="<?= $item["birthplace"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="months">Months:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["months"] ?>" disabled>
+                                                            value="<?= $item["months"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_date">Baptismal Date:</label>
+                                                        <label for="date">Baptismal Date:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("F j, Y", strtotime($itemdecline["baptismal_date"])) ?>" disabled>
+                                                            value="<?= date("F j, Y", strtotime($item["date"])) ?>"
+                                                            disabled>
                                                     </div>
                                                     <div class="form-group col-md">
-                                                        <label for="baptismal_time">Baptismal Time:</label>
+                                                        <label for="time">Baptismal Time:</label>
                                                         <input type="text" class="form-control"
-                                                        value="<?= date("h:i A", strtotime($itemdecline["baptismal_time"])) ?>" disabled>
+                                                            value="<?= date("h:i A", strtotime($item["time"])) ?>"
+                                                            disabled>
                                                     </div>
                                                 </div>
 
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="current_address">Current Address:</label>
+                                                        <label for="complete_address">Current Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["current_address"] ?>" disabled>
+                                                            value="<?= $item["complete_address"] ?>" disabled>
                                                     </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="father_name">Father's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["father_name"] ?>" disabled>
+                                                            value="<?= $item["father_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="father_origin_place">Father's Origin Place:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["father_origin_place"] ?>" disabled>
+                                                            value="<?= $item["father_origin_place"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
@@ -1291,69 +1518,68 @@ tr {
                                                         <label for="mother_maiden_fullname">Mother's Maiden Full
                                                             Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["mother_maiden_fullname"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["mother_maiden_fullname"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="mother_origin_place">Mother's Origin Place:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["mother_origin_place"] ?>" disabled>
+                                                            value="<?= $item["mother_origin_place"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="marriage">Marriage:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["marriage"] ?>" disabled>
+                                                            value="<?= $item["marriage"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="marriage_location">Marriage Location:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["marriage_location"] ?>" disabled>
+                                                            value="<?= $item["marriage_location"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="godfather">Godfather:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godfather"] ?>" disabled>
+                                                            value="<?= $item["godfather"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godfather_age">Godfather's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godfather_age"] ?>" disabled>
+                                                            value="<?= $item["godfather_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godfather_religion">Godfather's Religion:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godfather_religion"] ?>" disabled>
+                                                            value="<?= $item["godfather_religion"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godfather_address">Godfather's Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godfather_address"] ?>" disabled>
+                                                            value="<?= $item["godfather_address"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="godmother">Godmother:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godmother"] ?>" disabled>
+                                                            value="<?= $item["godmother"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godmother_age">Godmother's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godmother_age"] ?>" disabled>
+                                                            value="<?= $item["godmother_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godmother_religion">Godmother's Religion:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godmother_religion"] ?>" disabled>
+                                                            value="<?= $item["godmother_religion"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="godmother_address">Godmother's Address:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["godmother_address"] ?>" disabled>
+                                                            value="<?= $item["godmother_address"] ?>" disabled>
                                                     </div>
                                                 </div>
 
@@ -1361,19 +1587,18 @@ tr {
                                                     <div class="form-group col-md">
                                                         <label for="client_name">Client's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["client_name"] ?>" disabled>
+                                                            value="<?= $item["client_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="client_relationship">Client's Relationship:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["client_relationship"] ?>" disabled>
+                                                            value="<?= $item["client_relationship"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="client_contact_number">Client's Contact
                                                             Number:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["client_contact_number"] ?>"
-                                                            disabled>
+                                                            value="<?= $item["client_contact_number"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
@@ -1381,7 +1606,7 @@ tr {
                                                         <label for="psa_cenomar_photocopy_groom">Copy of Birth
                                                             Certificate:</label>
                                                         <?php
-                                                        $url = $itemdecline["copy_birth_certificate"];
+                                                        $url = $item["copy_birth_certificate"];
                                                         $hiddenValue = str_repeat("Birth Certificate", strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1389,12 +1614,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["copy_birth_certificate"] ?>">View</button>
+                                                                    data-url="<?= $item["copy_birth_certificate"] ?>">View</button>
                                                             </div>
                                                         </div>
                                                         <div class="file-path" id="psa_cenomar_photocopy_groom_path"
                                                             style="display: none;">
-                                                            <?= $itemdecline["copy_birth_certificate"] ?>
+                                                            <?= $item["copy_birth_certificate"] ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1403,7 +1628,7 @@ tr {
                                                         <label for="copy_marriage_certificate">Copy of Marriage
                                                             Certificate:</label>
                                                         <?php
-                                                        $url = $itemdecline["copy_marriage_certificate"];
+                                                        $url = $item["copy_marriage_certificate"];
                                                         $hiddenValue = str_repeat("Marriage Certificate", strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1411,12 +1636,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["copy_marriage_certificate"] ?>">View</button>
+                                                                    data-url="<?= $item["copy_marriage_certificate"] ?>">View</button>
                                                             </div>
                                                         </div>
                                                         <div class="file-path" id="psa_cenomar_photocopy_groom_path"
                                                             style="display: none;">
-                                                            <?= $itemdecline["copy_marriage_certificate"] ?>
+                                                            <?= $item["copy_marriage_certificate"] ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1442,8 +1667,6 @@ tr {
     </div>
 
     <div id="imageModal" class="modal_pic">
-
-        <!-- <span class="close">&times;</span> -->
         <img class="modal_img" id="modalImage">
     </div>
 
@@ -1514,7 +1737,7 @@ function declineBinyag(dataId) {
             console.log('AJAX Success:', response);
             if (response.trim() === 'success') {
                 alert('The application declined successfully!');
-                alert('Please Visit Decline tab For Sending Decline Email Thank You');
+                // alert('Please Visit Decline tab For Sending Decline Email Thank You');
                 sendDeclineEmail(dataId);
                 location.reload();
             } else {
@@ -1528,6 +1751,7 @@ function declineBinyag(dataId) {
         }
     });
 }
+
 function sendDeclineEmail(dataId) {
     $.ajax({
         type: 'GET',
@@ -1733,5 +1957,11 @@ document.addEventListener("DOMContentLoaded", function() {
     color: #bbb;
     text-decoration: none;
     cursor: pointer;
+}
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
 }
 </style>

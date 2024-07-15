@@ -24,7 +24,7 @@ $row = mysqli_fetch_assoc($result);
 <?php 
 function getBaptismal() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag_request_certificate WHERE status_id = 2";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag_request_certificate WHERE status_id = 2";
     $statement = $pdo->prepare($query);
     $statement->execute();
     return $statement->fetchAll(PDO::FETCH_ASSOC);

@@ -28,9 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["groupId"])) {
 
     $groupId = $_POST["groupId"];
 
-    $sql = "SELECT o.*, l.email AS user_email FROM `orders` AS o
-            INNER JOIN `login` AS l ON o.customer_id = l.id
-            WHERE o.`group_order` = ?";
+    $sql = "SELECT o.*, l.email AS user_email, l.first_name AS user_first_name FROM `orders` AS o
+    INNER JOIN `login` AS l ON o.customer_id = l.id
+    WHERE o.`group_order` = ?";
     $stmt = mysqli_prepare($conn, $sql);
     if ($stmt === false) {
         echo "Error: Unable to prepare statement. " . mysqli_error($conn);
@@ -85,10 +85,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["groupId"])) {
                     <img src="https://res.cloudinary.com/dqtbveriz/image/upload/v1711791868/logo_white_lio37e.png" alt="Sample Logo" style="display: inline-block; max-width: 200px;">
                 </div>
                 <h2 style="color: #333333; font-size: 24px; font-weight: bold; text-align: center;"></h2>
-                <p style="font-size: 16px;"><strong>Dear</strong> </p>
-                <p style="font-size: 16px;"><strong>We are pleased to inform you that your Order with ' . $row["group_order"] . 'has been Completed.</strong></p>
-                <p style="font-size: 16px;"><strong> with the exact ammount of ' . $row["grandtotal"] . ' Thank You...</strong></p>
-                <p style="font-size: 16px;"><strong>' . $auth_firstname . '</p>
+                <p style="font-size: 16px;"><strong>Hello! </strong> ' . $row["user_first_name"] . ' </p>
+                <p style="font-size: 16px;"><strong>Your order ' . $row["group_order"] . ' has been delivered! If you have any questions, feel free to reach out.</strong></p>
+                <p style="font-size: 16px;"><strong>Thanks,</p>
                 <p style="font-size: 16px;">ICP</p>';
 
             // Send the email

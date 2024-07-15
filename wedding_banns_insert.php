@@ -18,8 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo 'exists'; // Signal that data already exists
         } else {
             $status = 'ongoing';
-            $insertQuery = "INSERT INTO wedding_banns (reference_id, id_picture_groom, id_picture_bride, groom_name, groom_age, groom_father_name, groom_mother_name, bride_name, bride_age, bride_father_name, bride_mother_name, status) 
-            VALUES ('{$row['reference_id']}', '{$row['id_picture_groom']}', '{$row['id_picture_bride']}', '{$row['groom_name']}', '{$row['groom_age']}', '{$row['groom_father_name']}', '{$row['groom_mother_name']}', '{$row['bride_name']}', '{$row['bride_age']}', '{$row['bride_father_name']}', '{$row['bride_mother_name']}', '$status')";
+            $place_marriage = 'Immaculate Conception Parish Pandi';
+            $insertQuery = "INSERT INTO wedding_banns (reference_id, id_picture_groom, id_picture_bride, groom_name, groom_age, groom_father_name, groom_mother_name, bride_name, bride_age, bride_father_name, bride_mother_name, status, date_marriage, place_marriage) 
+            VALUES ('{$row['reference_id']}', '{$row['id_picture_groom']}', '{$row['id_picture_bride']}', '{$row['groom_name']}', '{$row['groom_age']}', '{$row['groom_father_name']}', '{$row['groom_mother_name']}', '{$row['bride_name']}', '{$row['bride_age']}', '{$row['bride_father_name']}', '{$row['bride_mother_name']}', '$status', '{$row['date']}', '$place_marriage')";
             
             $insertResult = mysqli_query($conn, $insertQuery);
 

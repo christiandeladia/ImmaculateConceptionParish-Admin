@@ -224,11 +224,18 @@
     u {
         font-size: 30px;
     }
+    .text-content {
+    position: relative;
+    z-index: 1;
+}
 
-    img {
-        margin: 500px;
-        z-index: 1000;
-    }
+.image-signature {
+    position: absolute;
+    top: 160px; /* Adjust this value to position the signature vertically */
+    left: 100px; /* Adjust this value to position the signature horizontally */
+    z-index: 0;
+}
+
     </style>
 </head>
 
@@ -286,15 +293,13 @@
             echo ' <div id="certificateContent">';
             echo '<div class="card h-3/4">';
             echo '<div class="containers">';
+            echo '<div class="text-content">';
             echo '<p class=" center text-xs" style="font-family: palatino; font-size: 20px;">DIOCESE OF MALOLOS</p>';
             echo '<h1 class="center text-xs" style="font-family: GuyfordBlackletter, Old English Text MT, Cloister Black; font-size: 30px;">Immaculate Conception Parish</h1>';
 
             echo '<p class=" center text-xs" style="font-family: palatino; font-size: 16px;">J.P. RIZAL., ST. POBLACION, PANDI, BULACAN</p>';
 
             echo '<br><h2 class="center text-xs" style="font-family: GuyfordBlackletter, Old English Text MT, Cloister Black; font-size: 50px; color:#7d534c; ">Certificate of <span id="Certificate" class="editable" contenteditable="true"> Baptism </span></h2>';
-
-            echo '<br>';
-            echo '<br>';
             echo '<h3 class="center " style="font-family:GuyfordBlackletter, Old English Text MT, Cloister Black; font-size: 22px;">This is to Certify</h3>';
 
             echo '<div class="content">';
@@ -305,19 +310,21 @@
             
             echo '<p class="ml-12 center" style="font-family:Brush Script MT, Brush Script Std, cursive; font-size: 27px;">on the <u>' . $baptizedday . '</u> day of <u>' . $baptizedmonthInWord . '</u>, <u>' . $baptizedyear . '</u></p>';            
             echo '<br>';
-            
             echo '<h3 class="center " style="font-family:GuyfordBlackletter, Old English Text MT, Cloister Black; font-size: 22px;">According to the Rites of the Roman Catholic Church </h3>';
-            echo '<br>';
             echo '<p class="ml-12 " style="font-family:Brush Script MT, Brush Script Std, cursive; font-size: 27px;">By the Rev.<u>' . $row['baptized_by'] . '</u>, the Sponsors being <u>' .  $row['godfather'] . '</u> and <u>' .  $row['godmother'] . '</u></span>,';
 
             echo '<h3 class="center " style="font-family:GuyfordBlackletter, Old English Text MT, Cloister Black; font-size: 22px;">as it appears in the Confirmation Registry of this Church</h3>';
 
-            echo '<br><p style="font-family:palatino; font-size: 17px;">BOOK NO. _____ PAGE NO. _____ LINE NO. _____</p>';
-            echo '<p class="ml-12" style="font-family:palatino; font-size: 17px;">ISSUED:_________________FOR  ___________________</p>';
+            echo '<br><p style="font-family:palatino; font-size: 17px;">BOOK NO. ' . $row['book_no'] . ' PAGE NO. ' . $row['page_no'] . ' LINE NO. ' . $row['line_no'] . ' </p>';
+            echo '<p class="ml-12" style="font-family:palatino; font-size: 17px;">ISSUED: ' . $row['issued'] . ' FOR ' . $row['fors'] . ' </p>';
             
-        echo '<p><br>____________________</p>';
-        echo '<p style="font-size: 18px;">REV. FR. JOSELIN SAN JOSE</p>';
+            echo '<img id= "signature" style="
+            height: 70px;
+        " src="https://res.cloudinary.com/dyacodwnx/image/upload/v1715650132/vbk2jobbepjtmwir6mm9.png" alt="Signature">';
+            echo '<hr style=" width: 50%;">';
+            echo '<p style="font-size: 18px;">REV. FR. JOSELIN SAN JOSE</p>';
         echo '<i style="font-size: 18px;">Parish Priest</i>';
+        echo '</div>';
         echo '</div>';
         echo '</div>';
         
@@ -368,9 +375,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (generatePdfButton) {
         generatePdfButton.addEventListener('click', function() {
             const content = document.getElementById('certificateContent');
+            const childFirstName = "<?php echo $row['child_first_name']; ?>";
+            const mothermaidenlastname = "<?php echo $row['mother_maiden_lastname']; ?>";
+            const fatherlastname = "<?php echo $row['father_lastname']; ?>";
             const pdfOptions = {
                 margin: 0,
-                filename: 'baptism_certificate.pdf',
+                filename: `${childFirstName}_${mothermaidenlastname}_${fatherlastname}_baptism_certificate.pdf`,
                 image: { type: 'jpeg', quality: 1 },
                 html2canvas: { scale: 1, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }

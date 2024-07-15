@@ -29,9 +29,30 @@ if(isset($_POST['submit'])) {
     <title>ADMIN</title>
     <link rel="stylesheet" href="style/login.css">
     <link rel="icon" type="image/x-icon" href="image/admin.ico">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<style>
+    .password-input {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password-icon {
+  cursor: pointer;
+  /* margin-left: 10px; */
+  float: right;
+  margin-left: -25px;
+  margin-top: -25px;
+  padding-right: 12px;
+  position: relative;
+  z-index: 2;
+  color:  black;
+}
+</style>
 <!-- <body>
     <h2>Admin Login</h2>
     <?php if (isset($error_message)) : ?>
@@ -51,11 +72,12 @@ if(isset($_POST['submit'])) {
 <body>
     <div id="form-main-wrapper">
         <div class="form-container">
-            <div class="admin-avtar">
-                <h1>Admin Login</h1>
-            </div>
+            
             <div class="form-wrapper">
                 <div class="form-con form">
+                <div class="admin-avtar">
+                <h1>Admin Login</h1>
+            </div>
                     <?php if (isset($error_message)) : ?>
                     <p><?php echo $error_message; ?></p>
                     <?php endif; ?>
@@ -67,7 +89,11 @@ if(isset($_POST['submit'])) {
                         <div class="field-con">
                             <label for="password">Password</label>
                             <input id="password" type="password" name="password" placeholder="**********" required>
+                            <span class="fas fa-eye-slash toggle-password-icon" id="togglePassword"></span>
                         </div>
+                        <div class="field-con" style="padding-left: 5px;">
+                        <div class="g-recaptcha" data-sitekey="6LdHhWkpAAAAANoFPNxXANeCUcRXtKfUrQ-Icdez"></div>
+                    </div>
 
                         <div class="flex form-btn-con">
                             <!-- < class="remember-me">
@@ -80,7 +106,7 @@ if(isset($_POST['submit'])) {
                             </span>
 
                             <div class="sub-btn-wrap">
-                                <input type="submit" class="form-submit" name="submit" id="btncheck" value="login" />
+                                <input type="submit" class="form-submit" name="submit" id="btncheck" value="Login" />
                             </div>
                         </div>
                     </form>
@@ -88,7 +114,7 @@ if(isset($_POST['submit'])) {
             </div>
 
             <div class="add-links">
-                <a href="thesis/index.php" title="Back to FoodWeb Homepage">Back to Site</a>
+                <!-- <a href="thesis/index.php" title="Back to FoodWeb Homepage">Back to Site</a> -->
             </div>
         </div>
 
@@ -96,5 +122,30 @@ if(isset($_POST['submit'])) {
     </div>
 </body>
 <script src="js/checkbox.js"></script>
+<script>
+    const passwordField = document.getElementById("password");
+    const togglePasswordIcon = document.getElementById("togglePassword");
 
+    togglePasswordIcon.addEventListener("click", function() {
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            togglePasswordIcon.classList.remove("fa-eye-slash");
+            togglePasswordIcon.classList.add("fa-eye");
+        } else {
+            passwordField.type = "password";
+            togglePasswordIcon.classList.remove("fa-eye");
+            togglePasswordIcon.classList.add("fa-eye-slash");
+        }
+    });
+</script>
+<script>
+    $(document).on('click', '#btncheck', function(event) {
+        var response = grecaptcha.getResponse();
+        if (response.length == 0) {
+            alert("Please Verify you are not a robot");
+            event.preventDefault(); // Prevent form submission
+            return false;
+        }
+    });
+</script>
 </html>

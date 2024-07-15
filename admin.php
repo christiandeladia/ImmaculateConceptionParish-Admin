@@ -23,7 +23,7 @@ if (!isset($_SESSION['auth_admin'])) {
     
     function getInventory($status = 'active') {
         global $pdo;
-        $sql = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM admin_login WHERE status = :status";
+        $sql = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM admin_login WHERE status = :status";
         $admin_login = [];
         $statement = $pdo->prepare($sql);
         $statement->bindParam(':status', $status, PDO::PARAM_STR);
@@ -72,7 +72,7 @@ $total_inactive_admin = getInactiveAdminCount();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="image/admin.ico">
-    <title>Admin</title>
+    <title>Account | Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -164,6 +164,13 @@ a {
 .nav-links {
     border-top-left-radius: 1.5rem;
     border-top-right-radius: 0.5rem;
+}
+
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
 }
 </style>
 

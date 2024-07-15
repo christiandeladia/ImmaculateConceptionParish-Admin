@@ -35,17 +35,17 @@
         return $result['totalCount'];
     }
     $total_process = getCount();  
-
     function getCounts() {
         global $pdo; 
-        $sql = "SELECT COUNT(*) as totalCount FROM `orders`";
+        $sql = "SELECT COUNT(DISTINCT group_order) as totalCount FROM `orders` WHERE status = 1";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
         return $result['totalCount'];
     }
-    $total_ship = getCounts();  
+    $total_ship = getCounts();
+    
     
     function getOrderTotal() {
         global $pdo; 
@@ -62,7 +62,7 @@
 
     function getSalesTotal() {
         global $pdo;
-        $sql = "SELECT SUM(product_price * product_quantity) AS total_sales FROM `orders`;";
+        $sql = "SELECT SUM(product_price * product_quantity) AS total_sales FROM `orders` WHERE status = 4;";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -75,7 +75,7 @@
     
     function getOrders() {
         global $pdo;
-        $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM orders";
+        $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM orders";
         $inventory = [];
         $statement = $pdo->prepare($query);
         $statement->execute();
@@ -92,7 +92,20 @@
     
         return $result['totalCount'];
     }
-    $total_binyag = getBaptismalTotal();   
+    $binyag = getBaptismalTotal();
+
+    function getBaptismalCertTotal() {
+        global $pdo; 
+        $sql = "SELECT COUNT(*) as totalCount FROM `binyag_request_certificate` WHERE status_id = 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        return $result['totalCount'];
+    }
+    $cert = getBaptismalCertTotal();
+    $total_binyag = $binyag + $cert;
+
 
     function getBlessingTotal() {
         global $pdo; 

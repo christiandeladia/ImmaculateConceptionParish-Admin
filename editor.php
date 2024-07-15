@@ -60,7 +60,7 @@ function getTimeAgo($timestamp) {
 
 function getMassIData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 2 ORDER BY date_added DESC";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 2 ORDER BY date_added DESC";
     $massIntention = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -77,7 +77,7 @@ $massIntention = getMassIData();
 
 function getData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM notification ORDER BY date_added DESC";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM notification ORDER BY date_added DESC";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -106,7 +106,7 @@ $service_links = array(
 <?php 
 function getMassData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 3";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -118,7 +118,7 @@ $mass = getMassData();
 <?php 
 function getWeddingData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding WHERE status_id = 3";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -130,7 +130,7 @@ $wedding = getWeddingData();
 <?php 
     function getBaptismalData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag WHERE status_id = 3";
     $Baptismal = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -143,7 +143,7 @@ $wedding = getWeddingData();
 <?php 
     function getBlessingData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM blessing WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM blessing WHERE status_id = 3";
     $Blessing = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -155,7 +155,7 @@ $wedding = getWeddingData();
 <?php 
     function getFuneralData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM funeral WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM funeral WHERE status_id = 3";
     $complete = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -167,7 +167,7 @@ $wedding = getWeddingData();
 <?php 
     function getSickcallData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall WHERE status_id = 3";
     $complete = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -188,14 +188,14 @@ $wedding = getWeddingData();
 // Function to get data for last week
 function getDataLastWeek($tableName) {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW()) - 1";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW()) - 1";
     $statement = $pdo->prepare($query);
     $statement->execute();
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
 function getDatathisWeek($tableName) {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW())";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW())";
     $statement = $pdo->prepare($query);
     $statement->execute();
     return $statement->fetchAll(PDO::FETCH_ASSOC);

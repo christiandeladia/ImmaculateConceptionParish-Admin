@@ -46,6 +46,8 @@ if (!isset($_SESSION['auth_admin'])) {
                 'date_added' => [$row['date_added']],
                 'status' => [$row['status']],
                 'trackingNumber' => [$row['trackingNumber']],
+                'order_courier' => [$row['order_courier']],
+                'order_payment' => [$row['order_payment']],
                 'reason' => [$row['reason']],
                 'grandtotal' => [$row['grandtotal']]
             ];
@@ -116,6 +118,7 @@ $totalStatus5 = countStatus5Occurrences($combinedRows);
 <?php
 $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -136,12 +139,14 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
 </head>
 
 <body>
+
     <?php 
     $activePage = 'orders'; 
     include 'nav.php';
     ?>
     <div></div>
     <div class="product">
+        
         <div class=".container-fluid mt-4 card mb-2 bg-light shadow" style=" margin: 0 3%">
             <div class="card-body">
 
@@ -161,8 +166,7 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                         <div class="col-md-6 col-lg-4 text-center">
                             <h4 class="h2 font-weight-normal mb-1">
                                 <i class="fas fa-coins text-info"></i>
-                                <span class="d-inline-block count1" data-from="0" data-to="250" data-time="2000">₱
-                                    <?php echo number_format($total_sales); ?></span>
+                                <span class="d-inline-block count1" data-from="0" data-to="250" data-time="2000">₱<?php echo number_format($total_sales, 2, '.', ''); ?></span>
                             </h4>
                             <p class="font-weight-normal text-muted">Total Sales</p>
                         </div>
@@ -232,11 +236,10 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
+                                    <th></th>
                                     <th>Quantity</th>
-                                    <th>Customer's Name</th>
-                                    <th>Address</th>
+                                    <th>Price</th>              
+                                    <th>Shipping Channel</th>
                                     <th>Date Order</th>
                                     <th>Actions</th>
                                 </tr>
@@ -248,7 +251,7 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                     <td><?php echo $groupOrder; ?></td>
                                     <td>
                                         <?php foreach ($data['image'] as $index => $image) {
-                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;">';
+                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;"><br>';
                                         }; ?>
                                     </td>
                                     <td>
@@ -257,18 +260,19 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                         } ?>
                                     </td>
                                     <td>
-                                        <?php foreach ($data['product_price'] as $product_price) {
-                                            echo '₱' . number_format($product_price, 2) . '<br>';
-                                        } ?>
-                                    </td>
-                                    <td>
                                         <?php foreach ($data['product_quantity'] as $product_quantity) {
                                             echo 'x' . $product_quantity . '<br>';
                                         } ?>
                                     </td>
-                                    <td><?php echo $data['order_username'][0]; ?></td>
-                                    <td><?php echo $data['order_address'][0]; ?></td>
-                                    <td><?php echo $data['date_added'][0]; ?></td>
+                                    <td>₱<?php echo number_format($data['grandtotal'][0], 2, '.', ''); ?><br><span class="text-muted"><?php echo $data['order_payment'][0]; ?></span></td>  
+                                    <td><?php echo $data['order_courier'][0]; ?></td>
+                                    <td><?php 
+                                        $date_added = strtotime($data['date_added'][0]);
+                                        $date = date('M d, Y', $date_added);
+                                        $time = date('h:i a', $date_added);
+                                        echo "$date<br>";
+                                        echo "$time";
+                                        ?></td>
                                     <td>
                                         <button class="btn-sm btn-success btn-block mb-2 viewBtn" data-toggle="modal"
                                             data-target="#groupModal" data-group-order="<?php echo $groupOrder; ?>"><i
@@ -329,11 +333,10 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
+                                    <th></th>
                                     <th>Quantity</th>
-                                    <th>Customer's Name</th>
-                                    <th>Address</th>
+                                    <th>Price</th>              
+                                    <th>Shipping Channel</th>
                                     <th>Date Order</th>
                                     <th>Actions</th>
                                 </tr>
@@ -345,7 +348,7 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                     <td><?php echo $groupOrder; ?></td>
                                     <td>
                                         <?php foreach ($data['image'] as $index => $image) {
-                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;">';
+                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;"><br>';
                                         }; ?>
                                     </td>
                                     <td>
@@ -354,18 +357,19 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                         } ?>
                                     </td>
                                     <td>
-                                        <?php foreach ($data['product_price'] as $product_price) {
-                                            echo '₱' . number_format($product_price, 2) . '<br>';
-                                        } ?>
-                                    </td>
-                                    <td>
                                         <?php foreach ($data['product_quantity'] as $product_quantity) {
                                             echo 'x' . $product_quantity . '<br>';
                                         } ?>
                                     </td>
-                                    <td><?php echo $data['order_username'][0]; ?></td>
-                                    <td><?php echo $data['order_address'][0]; ?></td>
-                                    <td><?php echo $data['date_added'][0]; ?></td>
+                                    <td>₱<?php echo number_format($data['grandtotal'][0], 2, '.', ''); ?><br><span class="text-muted"><?php echo $data['order_payment'][0]; ?></span></td>  
+                                    <td><?php echo $data['order_courier'][0]; ?></td>
+                                    <td><?php 
+                                        $date_added = strtotime($data['date_added'][0]);
+                                        $date = date('M d, Y', $date_added);
+                                        $time = date('h:i a', $date_added);
+                                        echo "$date<br>";
+                                        echo "$time";
+                                        ?></td>
                                     <td>
                                         <button class="btn-sm btn-success btn-block mb-2 viewBtn" data-toggle="modal"
                                             data-target="#groupModal" data-group-order="<?php echo $groupOrder; ?>"><i
@@ -424,11 +428,10 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
+                                    <th></th>
                                     <th>Quantity</th>
-                                    <th>Customer's Name</th>
-                                    <th>Address</th>
+                                    <th>Price</th>              
+                                    <th>Shipping Channel</th>
                                     <th>Date Order</th>
                                     <th>Actions</th>
                                 </tr>
@@ -440,7 +443,7 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                     <td><?php echo $groupOrder; ?></td>
                                     <td>
                                         <?php foreach ($data['image'] as $index => $image) {
-                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;">';
+                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;"><br>';
                                         }; ?>
                                     </td>
                                     <td>
@@ -449,18 +452,19 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                         } ?>
                                     </td>
                                     <td>
-                                        <?php foreach ($data['product_price'] as $product_price) {
-                                            echo '₱' . number_format($product_price, 2) . '<br>';
-                                        } ?>
-                                    </td>
-                                    <td>
                                         <?php foreach ($data['product_quantity'] as $product_quantity) {
                                             echo 'x' . $product_quantity . '<br>';
                                         } ?>
                                     </td>
-                                    <td><?php echo $data['order_username'][0]; ?></td>
-                                    <td><?php echo $data['order_address'][0]; ?></td>
-                                    <td><?php echo $data['date_added'][0]; ?></td>
+                                    <td>₱<?php echo number_format($data['grandtotal'][0], 2, '.', ''); ?><br><span class="text-muted"><?php echo $data['order_payment'][0]; ?></span></td>  
+                                    <td><br><?php echo $data['order_courier'][0]; ?><br><span class="text-muted"><?php echo $data['trackingNumber'][0]; ?></span></td>
+                                    <td><?php 
+                                        $date_added = strtotime($data['date_added'][0]);
+                                        $date = date('M d, Y', $date_added);
+                                        $time = date('h:i a', $date_added);
+                                        echo "$date<br>";
+                                        echo "$time";
+                                        ?></td>
                                     <td>
                                         <button class="btn-sm btn-success btn-block mb-2 viewBtn" data-toggle="modal"
                                             data-target="#groupModal" data-group-order="<?php echo $groupOrder; ?>"><i
@@ -487,11 +491,10 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
+                                    <th></th>
                                     <th>Quantity</th>
-                                    <th>Customer's Name</th>
-                                    <th>Address</th>
+                                    <th>Price</th>              
+                                    <th>Shipping Channel</th>
                                     <th>Date Order</th>
                                     <th>Actions</th>
                                 </tr>
@@ -503,7 +506,7 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                     <td><?php echo $groupOrder; ?></td>
                                     <td>
                                         <?php foreach ($data['image'] as $index => $image) {
-                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;">';
+                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;"><br>';
                                         }; ?>
                                     </td>
                                     <td>
@@ -512,18 +515,19 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                         } ?>
                                     </td>
                                     <td>
-                                        <?php foreach ($data['product_price'] as $product_price) {
-                                            echo '₱' . number_format($product_price, 2) . '<br>';
-                                        } ?>
-                                    </td>
-                                    <td>
                                         <?php foreach ($data['product_quantity'] as $product_quantity) {
                                             echo 'x' . $product_quantity . '<br>';
                                         } ?>
                                     </td>
-                                    <td><?php echo $data['order_username'][0]; ?></td>
-                                    <td><?php echo $data['order_address'][0]; ?></td>
-                                    <td><?php echo $data['date_added'][0]; ?></td>
+                                    <td>₱<?php echo number_format($data['grandtotal'][0], 2, '.', ''); ?><br><span class="text-muted"><?php echo $data['order_payment'][0]; ?></span></td>  
+                                    <td><?php echo $data['order_courier'][0]; ?><br><span class="text-muted"><?php echo $data['trackingNumber'][0]; ?></span></td>
+                                    <td><?php 
+                                        $date_added = strtotime($data['date_added'][0]);
+                                        $date = date('M d, Y', $date_added);
+                                        $time = date('h:i a', $date_added);
+                                        echo "$date<br>";
+                                        echo "$time";
+                                        ?></td>
                                     <td>
                                         <button class="btn-sm btn-success btn-block mb-2 viewBtn" data-toggle="modal"
                                             data-target="#groupModal" data-group-order="<?php echo $groupOrder; ?>"><i
@@ -548,11 +552,10 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
+                                    <th></th>
                                     <th>Quantity</th>
-                                    <th>Customer's Name</th>
-                                    <th>Address</th>
+                                    <th>Price</th>              
+                                    <th>Shipping Channel</th>
                                     <th>Date Order</th>
                                     <th>Actions</th>
                                 </tr>
@@ -564,7 +567,7 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                     <td><?php echo $groupOrder; ?></td>
                                     <td>
                                         <?php foreach ($data['image'] as $index => $image) {
-                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;">';
+                                            echo '<img src="image/' . $image . '" width="40" height="50" alt="' . $data['product_name'][$index] . '" style="margin: 2px;"><br>';
                                         }; ?>
                                     </td>
                                     <td>
@@ -573,18 +576,19 @@ $totalOrders = $totalStatusOne + $totalStatusTwo + $totalStatus3 + $totalStatus4
                                         } ?>
                                     </td>
                                     <td>
-                                        <?php foreach ($data['product_price'] as $product_price) {
-                                            echo '₱' . number_format($product_price, 2) . '<br>';
-                                        } ?>
-                                    </td>
-                                    <td>
                                         <?php foreach ($data['product_quantity'] as $product_quantity) {
                                             echo 'x' . $product_quantity . '<br>';
                                         } ?>
                                     </td>
-                                    <td><?php echo $data['order_username'][0]; ?></td>
-                                    <td><?php echo $data['order_address'][0]; ?></td>
-                                    <td><?php echo $data['date_added'][0]; ?></td>
+                                    <td>₱<?php echo number_format($data['grandtotal'][0], 2, '.', ''); ?><br><span class="text-muted"><?php echo $data['order_payment'][0]; ?></span></td>  
+                                    <td><?php echo $data['order_courier'][0]; ?><br></td>
+                                    <td><?php 
+                                        $date_added = strtotime($data['date_added'][0]);
+                                        $date = date('M d, Y', $date_added);
+                                        $time = date('h:i a', $date_added);
+                                        echo "$date<br>";
+                                        echo "$time";
+                                        ?></td>
                                     <td>
                                         <button class="btn-sm btn-success btn-block mb-2 viewBtn" data-toggle="modal"
                                             data-target="#groupModal" data-group-order="<?php echo $groupOrder; ?>"><i
@@ -723,7 +727,7 @@ function sendCancelEmail(groupId) {
         },
         success: function(response) {
             console.log('Email sent:', response);
-            alert('to Recieve email has been sent!');
+            // alert('to Recieve email has been sent!');
             location.reload();
         },
         error: function(xhr, status, error) {
@@ -785,7 +789,7 @@ function sendCompleteEmail(groupId) {
         },
         success: function(response) {
             console.log('Email sent:', response);
-            alert('Completed email has been sent!');
+            // alert('Completed email has been sent!');
         },
         error: function(xhr, status, error) {
             console.error('Failed to send email:', status, error);
@@ -839,7 +843,7 @@ function sendApprovalEmail(groupId) {
         },
         success: function(response) {
             console.log('Email sent:', response);
-            alert('Approval email has been sent!');
+            // alert('Approval email has been sent!');
         },
         error: function(xhr, status, error) {
             console.error('Failed to send email:', status, error);
@@ -927,7 +931,7 @@ function sendRecieveEmail(groupId) {
         },
         success: function(response) {
             console.log('Email sent:', response);
-            alert('to Recieve email has been sent!');
+            // alert('To Recieve email has been sent!');
             location.reload();
         },
         error: function(xhr, status, error) {
@@ -1007,5 +1011,11 @@ a {
 .nav-links {
     border-top-left-radius: 1.5rem;
     border-top-right-radius: 0.5rem;
+}
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
 }
 </style>

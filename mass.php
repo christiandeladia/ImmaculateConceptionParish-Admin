@@ -27,7 +27,7 @@ $row = mysqli_fetch_assoc($result);
 function getMassData()
 {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -74,7 +74,6 @@ foreach ($massCounts as $count) {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -178,7 +177,6 @@ tr {
     text-align: center !important;
 }
 </style>
-
 <body>
     <?php $activePage = 'services';include 'nav.php';?>
     <div></div>
@@ -198,7 +196,6 @@ tr {
                     <div class="form">
                         <ul class="tab-group">
                             <li class="tab-left active"><a href="#ApplicationForm">Application Form</a></li>
-                            <!-- <li class="tab-right"><a href="#Requested Certificate">Requested Certificate</a></li> -->
                         </ul>
                     </div>
                 </section>
@@ -258,6 +255,7 @@ tr {
                                     <th>Purpose</th>
                                     <th>Name</th>
                                     <th>Date</th>
+                                    <th>Time</th>
                                     <th>Date Applied</th>
                                     <th>Actions</th>
                                 </tr>
@@ -271,7 +269,9 @@ tr {
                                     <td class="text-center align-middle"><?php echo $item['purpose']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['name']; ?></td>
                                     <td class="text-center align-middle">
-                                        <?php echo date('F j, Y', strtotime($item['date_started'])); ?></td>
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:m a', strtotime($item['time'])); ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
                                             <span class=""><?php echo $item['date_component']; ?></span>
@@ -321,15 +321,39 @@ tr {
                                                     <div class="form-group col-md">
                                                         <label for="date">Date:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?=date('M d, Y', strtotime($item["date_started"]))?> - <?=date('M d, Y', strtotime($item["date_ended"]))?>"
+                                                            value="<?=date('M d, Y', strtotime($item["date"]))?>"
                                                             disabled>
-
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=date('h:m a', strtotime($item["time"]))?>"
+                                                            disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="psa_cenomar_photocopy_groom">Payment:</label>
+                                                        <?php
+                                                        $url = $item["reciept"];
+                                                        $hiddenValue = str_repeat("Reciept", strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["reciept"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="reciept"
+                                                            style="display: none;">
+                                                            <?= $item["reciept"] ?>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="modal-footer">
-
                                                 <!-- PROCESS DECLINE BUTTON -->
                                                 <button type="button" class="btn btn-danger" data-toggle="modal"
                                                     data-target="#declineModal_<?php echo $item['id']; ?>">
@@ -352,9 +376,8 @@ tr {
                         </table>
                     </div>
 
-                    <!-- MODAL DECLINE -->
-                    <?php foreach ($inventory as $declineItem) {?>
-                    <div class="modal fade" id="declineModal_<?php echo $declineItem['id']; ?>" tabindex="-1"
+                    <?php foreach ($inventory as $item) {?>
+                    <div class="modal fade" id="declineModal_<?php echo $item['id']; ?>" tabindex="-1"
                         role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 1000px">
                             <div class="modal-content">
@@ -362,7 +385,7 @@ tr {
                                     <h5 class="modal-title" id="exampleModalLongTitle">
                                         REASON OF DECLINING
                                         (ID:
-                                        <?php echo $declineItem['reference_id']; ?>)</h5>
+                                        <?php echo $item['reference_id']; ?>)</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -373,7 +396,7 @@ tr {
                                             <div class="form-group col-md">
                                                 <label for="reason">Reason:</label>
                                                 <select class="form-control"
-                                                    id="reason_<?php echo $declineItem['id']; ?>" name="reason">
+                                                    id="reason_<?php echo $item['id']; ?>" name="reason">
                                                     <option value="Incomplete or Inaccurate Information">
                                                         Incomplete or Inaccurate Information
                                                     </option>
@@ -414,77 +437,24 @@ tr {
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Cancel</button>
                                         <button type="submit" class="btn btn-success"
-                                            onclick="declineMass(<?php echo $declineItem['id']; ?>)">OK</button>
+                                            onclick="declineMass(<?php echo $item['id']; ?>)">OK</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
                     <?php }?>
-<!-- GENERATE MODAL -->
-<div class="modal fade" id="generateModal" tabindex="-1" role="dialog" aria-labelledby="generateModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="pdfForm" action="forms/mass_pdf.php" method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="generateModalLabel">Generate to Pdf</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="text" id="datepicker" name="selected_date" placeholder="Select Date">
-                    <!-- APPROVED TABLE -->
-                    <table id="dataTableApproveModal" class="table table-striped table-responsive-lg" cellspacing="0" width="100%">
-                        <thead>
-                            <tr>
-                                <th>Reference ID</th>
-                                <th>Purpose</th>
-                                <th>Name</th>
-                                <th>Date</th>
-                                <th>Date Applied</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($inventory as $item) {
-                                if ($item['status_id'] == 2) {?>
-                                    <tr>
-                                        <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
-                                        <td class="text-center align-middle"><?php echo $item['purpose']; ?></td>
-                                        <td class="text-center align-middle"><?php echo $item['name']; ?></td>
-                                        <td class="text-center align-middle">
-                                            <?php echo date('F j, Y', strtotime($item['date_started'])); ?>
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            <div class="">
-                                                <span class=""><?php echo $item['date_component']; ?></span>
-                                                <p class="time text-muted mb-0">
-                                                    <?php echo $item['time_component']; ?></span>
-                                                </p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                            <?php }
-                            }?>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Generate PDF</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+       
 
-
-<!-- APPROVE TAB -->
-<div class="tab-pane fade" id="nav-Approved" role="tabpanel" aria-labelledby="nav-Approved-tab">
-    <br>
-    <!-- Button to trigger the modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#generateModal">
-        Generate
-    </button>   
+                    <!-- APPROVE TAB -->
+                    <div class="tab-pane fade" id="nav-Approved" role="tabpanel" aria-labelledby="nav-Approved-tab">
+                        <br>
+                        <!-- Button to trigger the modal -->
+                        <a href="forms/mass_pdf.php">
+                            <button type="button" class="btn btn-primary">
+                                Generate
+                            </button>
+                        </a>
                         <!-- APPROVED TABLE -->
                         <table id="dataTableApprove" class="table table-striped table-responsive-lg" cellspacing="0"
                             width="100%">
@@ -494,6 +464,7 @@ tr {
                                     <th>Purpose</th>
                                     <th>Name</th>
                                     <th>Date</th>
+                                    <th>Time</th>
                                     <th>Date Applied</th>
                                     <th>Actions</th>
                                 </tr>
@@ -506,7 +477,10 @@ tr {
                                     <td class="text-center align-middle"><?php echo $item['purpose']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['name']; ?></td>
                                     <td class="text-center align-middle">
-                                        <?php echo date('F j, Y', strtotime($item['date_started'])); ?>
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:m a', strtotime($item['time'])); ?>
                                     </td>
                                     <td class="text-center align-middle">
                                         <div class="">
@@ -540,7 +514,7 @@ tr {
                                                 </button>
                                             </div>
 
-                                            <<div class="modal-body">
+                                            <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="purpose">Purpose:</label>
@@ -556,229 +530,309 @@ tr {
 
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
-                                                        <label for="date_started">Date:</label>
+                                                        <label for="date">Date:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?=date('M d, Y', strtotime($item["date_started"]))?> - <?=date('M d, Y', strtotime($item["date_ended"]))?>"
+                                                            value="<?=date('M d, Y', strtotime($item["date"]))?>"
                                                             disabled>
-
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=date('h:m a', strtotime($item["time"]))?>"
+                                                            disabled>
                                                     </div>
                                                 </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-success"
-                                                onclick="sendcompleteEmailAndComplete(<?php echo $item['id']; ?>)">
-                                                Complete And Send Email
-                                            </button>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="psa_cenomar_photocopy_groom">Payment:</label>
+                                                        <?php
+                                                        $url = $item["reciept"];
+                                                        $hiddenValue = str_repeat("Reciept", strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["reciept"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="reciept"
+                                                            style="display: none;">
+                                                            <?= $item["reciept"] ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-success"
+                                                    onclick="sendcompleteEmailAndComplete(<?php echo $item['id']; ?>)">
+                                                    Complete And Send Email
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                <?php }?>
+                                <?php
+}?>
+
+                            </tbody>
+                        </table>
                     </div>
-                    <?php }?>
-                    <?php
-}?>
 
-                    </tbody>
-                    </table>
-                </div>
+                    <!-- COMPLETE TAB -->
+                    <div class="tab-pane fade" id="nav-completed" role="tabpanel" aria-labelledby="nav-completed-tab">
+                        <br>
+                        <!-- COMPLETE TABLE -->
+                        <table id="dataTableComplete" class="table table-striped table-responsive-lg" cellspacing="0"
+                            width="100%">
+                            <thead>
+                                <tr>
 
-                <!-- COMPLETE TAB -->
-                <div class="tab-pane fade" id="nav-completed" role="tabpanel" aria-labelledby="nav-completed-tab">
-                    <br>
-                    <!-- COMPLETE TABLE -->
-                    <table id="dataTableComplete" class="table table-striped table-responsive-lg" cellspacing="0"
-                        width="100%">
-                        <thead>
-                            <tr>
-
-                                <th>Reference ID</th>
-                                <th>Purpose</th>
-                                <th>Name</th>
-                                <th>Date</th>
-                                <th>Date Applied</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($inventory as $item) {
+                                    <th>Reference ID</th>
+                                    <th>Purpose</th>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Date Applied</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($inventory as $item) {
     if ($item['status_id'] == 3) {?>
-                            <tr>
-                                <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
-                                <td class="text-center align-middle"><?php echo $item['purpose']; ?></td>
-                                <td class="text-center align-middle"><?php echo $item['name']; ?></td>
-                                <td class="text-center align-middle">
-                                    <?php echo date('F j, Y', strtotime($item['date_started'])); ?></td>
-                                <td class="text-center align-middle">
-                                    <div class="">
-                                        <span class=""><?php echo $item['date_component']; ?></span>
-                                        <p class="time text-muted mb-0">
-                                            <?php echo $item['time_component']; ?></span>
-                                        </p>
-                                    </div>
-                                </td>
-                                <td class="text-center align-middle">
-                                    <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                        data-target="#view_<?php echo $item['id']; ?>">
-                                        <i class="fas fa-eye"></i>View
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- MODAL APPLICATION -->
-                            <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
-                                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document"
-                                    style="max-width: 1000px">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                <?php echo $item['reference_id']; ?>)</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
+                                <tr>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['purpose']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['name']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <div class="">
+                                            <span class=""><?php echo $item['date_component']; ?></span>
+                                            <p class="time text-muted mb-0">
+                                                <?php echo $item['time_component']; ?></span>
+                                            </p>
                                         </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
+                                            data-target="#view_<?php echo $item['id']; ?>">
+                                            <i class="fas fa-eye"></i>View
+                                        </button>
+                                    </td>
+                                </tr>
 
-                                        <div class="modal-body">
-                                            <div class="form-row">
-                                                <div class="form-group col-md">
-                                                    <label for="purpose">Purpose:</label>
-                                                    <input type="text" class="form-control"
-                                                        value="<?=$item["purpose"]?>" disabled>
-                                                </div>
-                                                <div class="form-group col-md">
-                                                    <label for="name">Name:</label>
-                                                    <input type="text" class="form-control" value="<?=$item["name"]?>"
-                                                        disabled>
-                                                </div>
+                                <!-- MODAL APPLICATION -->
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document"
+                                        style="max-width: 1000px">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
+                                                    <?php echo $item['reference_id']; ?>)</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
 
-                                            <div class="form-row">
-                                                <div class="form-group col-md">
-                                                    <label for="date_started">Date:</label>
-                                                    <input type="text" class="form-control"
-                                                        value="<?=date('M d, Y', strtotime($item["date_started"]))?> - <?=date('M d, Y', strtotime($item["date_ended"]))?>"
-                                                        disabled>
-                                                    <input type="text" class="form-control"
-                                                        value="<?=$item["date_started"]?>" disabled>
+                                            <div class="modal-body">
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="purpose">Purpose:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=$item["purpose"]?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="name">Name:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=$item["name"]?>" disabled>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Date:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=date('M d, Y', strtotime($item["date"]))?>"
+                                                            disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=date('h:m a', strtotime($item["time"]))?>"
+                                                            disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="psa_cenomar_photocopy_groom">Payment:</label>
+                                                        <?php
+                                                        $url = $item["reciept"];
+                                                        $hiddenValue = str_repeat("Reciept", strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["reciept"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="reciept"
+                                                            style="display: none;">
+                                                            <?= $item["reciept"] ?>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-success" data-dismiss="modal">
-                                                OK
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php }?>
-
-                            <?php
-}?>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- DECLINE TAB -->
-                <div class="tab-pane fade" id="nav-decline" role="tabpanel" aria-labelledby="nav-decline-tab">
-                    <table id="dataTableDecline" class="table table-striped table-responsive-lg" cellspacing="0"
-                        width="100%">
-                        <thead>
-                            <tr>
-                                <th>Reference ID</th>
-                                <th>Purpose</th>
-                                <th>Name</th>
-                                <th>Reason</th>
-                                <th>Remarks</th>
-                                <th>Date Applied</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($inventory as $item) {
-    if ($item['status_id'] == 4) {?>
-                            <tr>
-                                <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
-                                <td class="text-center align-middle"><?php echo $item['purpose']; ?></td>
-                                <td class="text-center align-middle"><?php echo $item['name']; ?></td>
-                                <td class="text-center align-middle"><?php echo $item['reason']; ?></td>
-                                <td class="text-center align-middle"><?php echo $item['remarks']; ?></td>
-                                <td class="text-center align-middle">
-                                    <div class="">
-                                        <span class=""><?php echo $item['date_component']; ?></span>
-                                        <p class="time text-muted mb-0">
-                                            <?php echo $item['time_component']; ?></span>
-                                        </p>
-                                    </div>
-                                </td>
-                                <td class="text-center align-middle">
-                                    <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                        data-target="#view_<?php echo $item['id']; ?>">
-                                        <i class="fas fa-eye"></i>View
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- MODAL APPLICATION -->
-                            <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
-                                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document"
-                                    style="max-width: 1000px">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                <?php echo $item['reference_id']; ?>)</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-
-                                        <div class="modal-body">
-                                            <p style="color: red;">Decline because of <?php echo $item['reason']; ?></p>
-                                            <div class="form-row">
-                                                <div class="form-group col-md">
-                                                    <label for="purpose">Purpose:</label>
-                                                    <input type="text" class="form-control"
-                                                        value="<?=$item["purpose"]?>" disabled>
-                                                </div>
-                                                <div class="form-group col-md">
-                                                    <label for="name">Name:</label>
-                                                    <input type="text" class="form-control" value="<?=$item["name"]?>"
-                                                        disabled>
-                                                </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-success" data-dismiss="modal">
+                                                    OK
+                                                </button>
                                             </div>
-
-                                            <div class="form-row">
-                                                <div class="form-group col-md">
-                                                    <label for="date_started">Date:</label>
-                                                    <input type="text" class="form-control"
-                                                        value="<?=date('M d, Y', strtotime($item["date_started"]))?> - <?=date('M d, Y', strtotime($item["date_ended"]))?>"
-                                                        disabled>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-success" data-dismiss="modal">
-                                                OK
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <?php }?>
+                                <?php }?>
 
-                            <?php
+                                <?php
 }?>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- DECLINE TAB -->
+                    <div class="tab-pane fade" id="nav-decline" role="tabpanel" aria-labelledby="nav-decline-tab">
+                        <table id="dataTableDecline" class="table table-striped table-responsive-lg" cellspacing="0"
+                            width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Reference ID</th>
+                                    <th>Purpose</th>
+                                    <th>Name</th>
+                                    <th>Reason</th>
+                                    <th>Remarks</th>
+                                    <th>Date Applied</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($inventory as $item) {
+                                    if ($item['status_id'] == 4) {?>
+                                <tr>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['purpose']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['name']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['reason']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['remarks']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <div class="">
+                                            <span class=""><?php echo $item['date_component']; ?></span>
+                                            <p class="time text-muted mb-0">
+                                                <?php echo $item['time_component']; ?></span>
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
+                                            data-target="#view_<?php echo $item['id']; ?>">
+                                            <i class="fas fa-eye"></i>View
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- MODAL APPLICATION -->
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document"
+                                        style="max-width: 1000px">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
+                                                    <?php echo $item['reference_id']; ?>)</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <p style="color: red;">Decline because of <?php echo $item['reason']; ?>
+                                                </p>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="purpose">Purpose:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=$item["purpose"]?>" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="name">Name:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=$item["name"]?>" disabled>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Date:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=date('M d, Y', strtotime($item["date"]))?>"
+                                                            disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?=date('h:m a', strtotime($item["time"]))?>"
+                                                            disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="psa_cenomar_photocopy_groom">Payment:</label>
+                                                        <?php
+                                                        $url = $item["reciept"];
+                                                        $hiddenValue = str_repeat("Reciept", strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["reciept"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="reciept"
+                                                            style="display: none;">
+                                                            <?= $item["reciept"] ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-success" data-dismiss="modal">
+                                                    OK
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php }?>
+                                <?php }?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="imageModal" class="modal_pic">
+        <img class="modal_img" id="modalImage">
     </div>
-
-
-
 </body>
 <!-- APPRVED JS -->
 <script>
@@ -846,7 +900,6 @@ function declineMass(dataId) {
             console.log('AJAX Success:', response);
             if (response.trim() === 'success') {
                 alert('The application declined successfully!');
-                alert('Please Visit Decline tab For Sending Decline Email Thank You');
                 sendDeclineEmail(dataId);
                 location.reload();
             } else {
@@ -859,6 +912,7 @@ function declineMass(dataId) {
         }
     });
 }
+
 function sendDeclineEmail(dataId) {
     $.ajax({
         type: 'GET',
@@ -868,7 +922,7 @@ function sendDeclineEmail(dataId) {
         },
         success: function(response) {
             console.log('Email sent:', response);
-            alert('Completion email has been sent!'); // Call completeMass function after sending the email
+            alert('Decline email has been sent!'); // Call completeMass function after sending the email
         },
         error: function(xhr, status, error) {
             console.error('Failed to send email:', status, error);
@@ -974,5 +1028,96 @@ $('#reason').change(function() {
     }
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var viewButtons = document.querySelectorAll('.view-btn');
+    var modal = document.getElementById('imageModal');
+    var modalImg = document.getElementById('modalImage');
+    var closeModal = document.getElementsByClassName('close')[0];
+    document.body.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+    });
+
+    viewButtons.forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            var url = this.getAttribute('data-url');
+            modal.style.display =
+                'block'; // Display the modal
+            modalImg.src = url; // Set the image source
+        });
+    });
+
+    document.querySelector('.close').addEventListener('click', function() {
+        document.getElementById('imageModal').style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target == modal) {
+            modal.style.display =
+                'none'; // Hide the modal when clicked outside of it
+        }
+    });
+
+    modal.addEventListener('contextmenu', function(event) {
+        event
+            .preventDefault(); // Prevent default right-click behavior
+    });
+
+    modalImg.addEventListener('contextmenu', function(event) {
+        event
+            .preventDefault(); // Prevent default right-click behavior
+    });
+});
+</script>
+<style>
+/* Center modal vertically and horizontally */
+.modal_pic {
+    display: none;
+    /* Hide modal by default */
+    position: fixed;
+    z-index: 1500;
+    padding-top: 100px;
+    /* Location of the modal */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.9);
+    /* Black w/ opacity */
+}
+
+.modal_img {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 800px;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
+}
+</style>
 
 </html>

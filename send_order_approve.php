@@ -28,9 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["groupId"])) {
 
     $groupId = $_POST["groupId"];
 
-    $sql = "SELECT o.*, l.email AS user_email FROM `orders` AS o
-            INNER JOIN `login` AS l ON o.customer_id = l.id
-            WHERE o.`group_order` = ?";
+    $sql = "SELECT o.*, l.email AS user_email, l.first_name AS user_first_name FROM `orders` AS o
+    INNER JOIN `login` AS l ON o.customer_id = l.id
+    WHERE o.`group_order` = ?";
     $stmt = mysqli_prepare($conn, $sql);
     if ($stmt === false) {
         echo "Error: Unable to prepare statement. " . mysqli_error($conn);
@@ -79,16 +79,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["groupId"])) {
             $auth_firstname = isset($_SESSION['auth_admin']['firstname']) ? $_SESSION['auth_admin']['firstname'] : '';
 
             // Set email subject and body
-            $mail->Subject = 'Order has been Approved';
+            $mail->Subject = 'Order To Ship';
             $mail->Body = '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(#93C572, #FFFFFF);">
                 <div style="background-color: #008000; text-align: center; padding: 10px;">
                     <img src="https://res.cloudinary.com/dqtbveriz/image/upload/v1711791868/logo_white_lio37e.png" alt="Sample Logo" style="display: inline-block; max-width: 200px;">
                 </div>
                 <h2 style="color: #333333; font-size: 24px; font-weight: bold; text-align: center;"></h2>
-                <p style="font-size: 16px;"><strong>Dear</strong> </p>
-                <p style="font-size: 16px;"><strong>We are pleased to inform you that your Order with ' . $row["group_order"] . ' has been approved and shipped.</strong></p>
-                <p style="font-size: 16px;"><strong>Your request has been shipped with careful consideration, and please be ready to pay the exact amount of ' . $row["grandtotal"] . ' Thank You...</strong></p>
-                <p style="font-size: 16px;"><strong>' . $auth_firstname . '</p>
+                <p style="font-size: 16px;"><strong>Hi! </strong> ' . $row["user_first_name"] . ' </p>
+                <p style="font-size: 16px;"><strong>Great news! Your order  ' . $row["group_order"] . ' ready to ship! We`ll be dispatching it shortly. Expect delivery details soon.</strong></p>
+                <p style="font-size: 16px;"><strong>Best,</p>
                 <p style="font-size: 16px;">ICP</p>';
 
             // Send the email

@@ -22,7 +22,7 @@ $row = mysqli_fetch_assoc($result);
 <?php 
 function getweddingData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -250,22 +250,24 @@ tr {
                                 <tr>
                                     <th>Reference ID</th>
                                     <th>Groom's Name</th>
-                                    <th>Age</th>
                                     <th>Bride's Name</th>
-                                    <th>Age</th>
+                                    <th>Preferred Date</th>
+                                    <th>Preferred Time</th>
                                     <th>Date Applied</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $item) { 
+                                <?php foreach ($inventory as $item) { 
                              if ($item['status_id'] == 1) { ?>
                                 <tr>
                                     <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['groom_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['groom_age']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['bride_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['bride_age']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:i A', strtotime($item['time'])); ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
                                             <span class=""><?php echo $item['date_component']; ?></span>
@@ -297,6 +299,54 @@ tr {
                                                 </button>
                                             </div>
                                             <div class="modal-body">
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="complete_address">Current Address:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["complete_address"] ?>" disabled>
+                                                    </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Date:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('F j, Y', strtotime($item['date'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="time">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('h:i a', strtotime($item['time'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="groom_name">Groom's Name:</label>
@@ -569,17 +619,17 @@ tr {
                     </div>
 
                     <!-- MODAL DECLINE -->
-                    <?php foreach ($inventory as $declineItem) { 
-                             if ($declineItem['status_id'] == 1) { ?>
-                    <div class="modal fade" id="declineModal_<?php echo $declineItem['id']; ?>" tabindex="-1"
-                        role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 1) { ?>
+                    <div class="modal fade" id="declineModal_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 1000px">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="exampleModalLongTitle">
                                         REASON OF DECLINING
                                         (ID:
-                                        <?php echo $declineItem['reference_id']; ?>)</h5>
+                                        <?php echo $item['reference_id']; ?>)</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -589,8 +639,8 @@ tr {
                                         <div class="form-row">
                                             <div class="form-group col-md">
                                                 <label for="reason">Reason:</label>
-                                                <select class="form-control"
-                                                    id="reason_<?php echo $declineItem['id']; ?>" name="reason">
+                                                <select class="form-control" id="reason_<?php echo $item['id']; ?>"
+                                                    name="reason">
                                                     <option value="Incomplete or Inaccurate Information">
                                                         Incomplete or Inaccurate Information
                                                     </option>
@@ -631,7 +681,7 @@ tr {
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Cancel</button>
                                         <button type="submit" class="btn btn-success"
-                                            onclick="declineWedding(<?php echo $declineItem['id']; ?>)">OK</button>
+                                            onclick="declineWedding(<?php echo $item['id']; ?>)">OK</button>
                                     </div>
                                 </form>
                             </div>
@@ -651,22 +701,24 @@ tr {
                                 <tr>
                                     <th>Reference ID</th>
                                     <th>Groom's Name</th>
-                                    <th>Age</th>
                                     <th>Bride's Name</th>
-                                    <th>Age</th>
+                                    <th>Preferred Date</th>
+                                    <th>Preferred Time</th>
                                     <th>Date Applied</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $item) { 
+                                <?php foreach ($inventory as $item) { 
                              if ($item['status_id'] == 2) { ?>
                                 <tr>
                                     <td class="text-center align-middle"><?php echo $item['reference_id']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['groom_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['groom_age']; ?></td>
                                     <td class="text-center align-middle"><?php echo $item['bride_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $item['bride_age']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:i A', strtotime($item['time'])); ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
                                             <span class=""><?php echo $item['date_component']; ?></span>
@@ -700,6 +752,54 @@ tr {
                                             </div>
 
                                             <div class="modal-body">
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="complete_address">Current Address:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["complete_address"] ?>" disabled>
+                                                    </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Date:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('F j, Y', strtotime($item['date'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="time">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('h:i a', strtotime($item['time'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="groom_name">Groom's Name:</label>
@@ -953,7 +1053,8 @@ tr {
                                                 <button type="button" class="btn btn-secondary"
                                                     data-dismiss="modal">Close</button>
                                                 <button type="button" class="btn btn-success"
-                                                    onclick="sendcompleteEmailAndComplete(<?php echo $item['id']; ?>)">Complete and Send Email</button>
+                                                    onclick="sendcompleteEmailAndComplete(<?php echo $item['id']; ?>)">Complete
+                                                    and Send Email</button>
                                             </div>
                                         </div>
                                     </div>
@@ -976,48 +1077,50 @@ tr {
                                 <tr>
                                     <th>Reference ID</th>
                                     <th>Groom's Name</th>
-                                    <th>Age</th>
                                     <th>Bride's Name</th>
-                                    <th>Age</th>
+                                    <th>Preferred Date</th>
+                                    <th>Preferred Time</th>
                                     <th>Date Applied</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $completeitem) { 
-                             if ($completeitem['status_id'] == 3) { ?>
+                                <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 3) { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $completeitem['reference_id']; ?>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?>
                                     </td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['groom_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['groom_age']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['bride_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $completeitem['bride_age']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['groom_name']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['bride_name']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('h:i A', strtotime($item['time'])); ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
-                                            <span class=""><?php echo $completeitem['date_component']; ?></span>
+                                            <span class=""><?php echo $item['date_component']; ?></span>
                                             <p class="time text-muted mb-0">
-                                                <?php echo $completeitem['time_component']; ?></span>
+                                                <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
                                     </td>
                                     <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                            data-target="#view_<?php echo $completeitem['id']; ?>">
+                                            data-target="#view_<?php echo $item['id']; ?>">
                                             <i class="fas fa-eye"></i>View
                                         </button>
                                     </td>
                                 </tr>
 
                                 <!-- MODAL APPLICATION -->
-                                <div class="modal fade" id="view_<?php echo $completeitem['id']; ?>" tabindex="-1"
-                                    role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document"
                                         style="max-width: 1000px">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                    <?php echo $completeitem['reference_id']; ?>)</h5>
+                                                    <?php echo $item['reference_id']; ?>)</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -1027,46 +1130,94 @@ tr {
                                             <div class="modal-body">
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
+                                                        <label for="complete_address">Current Address:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["complete_address"] ?>" disabled>
+                                                    </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Date:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('F j, Y', strtotime($item['date'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="time">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('h:i a', strtotime($item['time'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
                                                         <label for="groom_name">Groom's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["groom_name"] ?>" disabled>
+                                                            value="<?= $item["groom_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="groom_age">Groom's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["groom_age"] ?>" disabled>
+                                                            value="<?= $item["groom_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="groom_father_name">Groom's Father Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["groom_father_name"] ?>" disabled>
+                                                            value="<?= $item["groom_father_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="groom_mother_name">Groom's Mother Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["groom_mother_name"] ?>" disabled>
+                                                            value="<?= $item["groom_mother_name"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="bride_name">Bride's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["bride_name"] ?>" disabled>
+                                                            value="<?= $item["bride_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="bride_age">Bride's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["bride_age"] ?>" disabled>
+                                                            value="<?= $item["bride_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="bride_father_name">Bride's Father Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["bride_father_name"] ?>" disabled>
+                                                            value="<?= $item["bride_father_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="bride_mother_name">Bride's Mother Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $completeitem["bride_mother_name"] ?>" disabled>
+                                                            value="<?= $item["bride_mother_name"] ?>" disabled>
                                                     </div>
                                                 </div>
 
@@ -1076,7 +1227,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["psa_cenomar_photocopy_groom"];
+                                                        $url = $item["psa_cenomar_photocopy_groom"];
                                                         $hiddenValue = str_repeat('PSA Cenomar Photocopy (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1084,18 +1235,18 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["psa_cenomar_photocopy_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_cenomar_photocopy_groom"] ?>">View</button>
                                                             </div>
                                                         </div>
                                                         <div class="file-path" id="psa_cenomar_photocopy_groom_path"
                                                             style="display: none;">
-                                                            <?= $completeitem["psa_cenomar_photocopy_groom"] ?>
+                                                            <?= $item["psa_cenomar_photocopy_groom"] ?>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["psa_cenomar_photocopy_bride"];
+                                                        $url = $item["psa_cenomar_photocopy_bride"];
                                                         $hiddenValue = str_repeat('PSA Cenomar Photocopy (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1103,11 +1254,11 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["psa_cenomar_photocopy_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_cenomar_photocopy_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="psa_cenomar_photocopy_bride_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["psa_cenomar_photocopy_bride"] ?>
+                                                                <?= $item["psa_cenomar_photocopy_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1115,7 +1266,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["baptismal_certificates_groom"];
+                                                        $url = $item["baptismal_certificates_groom"];
                                                         $hiddenValue = str_repeat('Baptismal Certificates (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1123,19 +1274,19 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["baptismal_certificates_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["baptismal_certificates_groom"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="baptismal_certificates_groom_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["baptismal_certificates_groom"] ?>
+                                                                <?= $item["baptismal_certificates_groom"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["baptismal_certificates_bride"];
+                                                        $url = $item["baptismal_certificates_bride"];
                                                         $hiddenValue = str_repeat('Baptismal Certificates (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1143,12 +1294,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["baptismal_certificates_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["baptismal_certificates_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="baptismal_certificates_bride_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["baptismal_certificates_bride"] ?>
+                                                                <?= $item["baptismal_certificates_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1156,7 +1307,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["psa_birth_certificate_photocopy_groom"];
+                                                        $url = $item["psa_birth_certificate_photocopy_groom"];
                                                         $hiddenValue = str_repeat('PSA Birth Certificate Photocopy (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1164,19 +1315,19 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["psa_birth_certificate_photocopy_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_birth_certificate_photocopy_groom"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="psa_birth_certificate_photocopy_groom_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["psa_birth_certificate_photocopy_groom"] ?>
+                                                                <?= $item["psa_birth_certificate_photocopy_groom"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["psa_birth_certificate_photocopy_bride"];
+                                                        $url = $item["psa_birth_certificate_photocopy_bride"];
                                                         $hiddenValue = str_repeat('PSA Birth Certificate Photocopy (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1184,12 +1335,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["psa_birth_certificate_photocopy_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_birth_certificate_photocopy_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="psa_birth_certificate_photocopy_bride_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["psa_birth_certificate_photocopy_bride"] ?>
+                                                                <?= $item["psa_birth_certificate_photocopy_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1197,7 +1348,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["id_picture_groom"];
+                                                        $url = $item["id_picture_groom"];
                                                         $hiddenValue = str_repeat('ID Picture (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1205,18 +1356,18 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["id_picture_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["id_picture_groom"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="id_picture_groom_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["id_picture_groom"] ?>
+                                                                <?= $item["id_picture_groom"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["id_picture_bride"];
+                                                        $url = $item["id_picture_bride"];
                                                         $hiddenValue = str_repeat('ID Picture (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1224,11 +1375,11 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["id_picture_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["id_picture_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="id_picture_bride_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["id_picture_bride"] ?>
+                                                                <?= $item["id_picture_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1236,7 +1387,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["confirmation_certificates"];
+                                                        $url = $item["confirmation_certificates"];
                                                         $hiddenValue = str_repeat('Confirmation Certificates:', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1244,17 +1395,17 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["confirmation_certificates"] ?>">View</button>
+                                                                    data-url="<?= $item["confirmation_certificates"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="confirmation_certificates_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["confirmation_certificates"] ?>
+                                                                <?= $item["confirmation_certificates"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $completeitem["computerized_name_of_sponsors"];
+                                                        $url = $item["computerized_name_of_sponsors"];
                                                         $hiddenValue = str_repeat('Computerized Name of Sponsors:', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1262,22 +1413,22 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $completeitem["computerized_name_of_sponsors"] ?>">View</button>
+                                                                    data-url="<?= $item["computerized_name_of_sponsors"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="computerized_name_of_sponsors_path"
                                                                 style="display: none;">
-                                                                <?= $completeitem["computerized_name_of_sponsors"] ?>
+                                                                <?= $item["computerized_name_of_sponsors"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <div class="modal-footer">
-                                                <button type="button" class="btn btn-success" data-dismiss="modal">
-                                                    OK
-                                                </button>
-                                            </div>
+                                                    <button type="button" class="btn btn-success" data-dismiss="modal">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1297,6 +1448,7 @@ tr {
                                     <th>Reference ID</th>
                                     <th>Groom's Name</th>
                                     <th>Bride's Name</th>
+                                    <th>Preferred Date</th>
                                     <th>Reason</th>
                                     <th>Remarks</th>
                                     <th>Date Applied</th>
@@ -1304,40 +1456,42 @@ tr {
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($inventory as $itemdecline) { 
-                             if ($itemdecline['status_id'] == 4) { ?>
+                                <?php foreach ($inventory as $item) { 
+                             if ($item['status_id'] == 4) { ?>
                                 <tr>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['reference_id']; ?>
+                                    <td class="text-center align-middle"><?php echo $item['reference_id']; ?>
                                     </td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['groom_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['bride_name']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['reason']; ?></td>
-                                    <td class="text-center align-middle"><?php echo $itemdecline['remarks']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['groom_name']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['bride_name']; ?></td>
+                                    <td class="text-center align-middle">
+                                        <?php echo date('F j, Y', strtotime($item['date'])); ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['reason']; ?></td>
+                                    <td class="text-center align-middle"><?php echo $item['remarks']; ?></td>
                                     <td class="text-center align-middle">
                                         <div class="">
-                                            <span class=""><?php echo $itemdecline['date_component']; ?></span>
+                                            <span class=""><?php echo $item['date_component']; ?></span>
                                             <p class="time text-muted mb-0">
-                                                <?php echo $itemdecline['time_component']; ?></span>
+                                                <?php echo $item['time_component']; ?></span>
                                             </p>
                                         </div>
                                     </td>
                                     <td class="text-center align-middle">
                                         <button class="btn-sm btn-success btn-block mb-2" data-toggle="modal"
-                                            data-target="#view_<?php echo $itemdecline['id']; ?>">
+                                            data-target="#view_<?php echo $item['id']; ?>">
                                             <i class="fas fa-eye"></i>View
                                         </button>
                                     </td>
                                 </tr>
 
                                 <!-- MODAL APPLICATION -->
-                                <div class="modal fade" id="view_<?php echo $itemdecline['id']; ?>" tabindex="-1"
-                                    role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal fade" id="view_<?php echo $item['id']; ?>" tabindex="-1" role="dialog"
+                                    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document"
                                         style="max-width: 1000px">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="exampleModalLongTitle">Application Form (ID:
-                                                    <?php echo $itemdecline['reference_id']; ?>)</h5>
+                                                    <?php echo $item['reference_id']; ?>)</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -1345,49 +1499,99 @@ tr {
                                             </div>
 
                                             <div class="modal-body">
-                                            <p style="color: red;">Decline because of <?php echo $itemdecline['reason']; ?></p>
+                                                <p style="color: red;">Decline because of
+                                                    <?php echo $item['reason']; ?></p>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="complete_address">Current Address:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["complete_address"] ?>" disabled>
+                                                    </div>
+
+                                                    <?php if ($item["permission"] === 'N/A'): ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= $item["permission"] ?>" disabled>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <div class="form-group col-md">
+                                                        <label for="permission">Permission Certificate:</label>
+                                                        <?php
+                                                        $url = $item["permission"];
+                                                        $hiddenValue = str_repeat('Permission Certificate', strlen(1));
+                                                        ?>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control"
+                                                                value="<?= $hiddenValue ?>" disabled>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-primary view-btn"
+                                                                    data-url="<?= $item["permission"] ?>">View</button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="file-path" id="permission" style="display: none;">
+                                                            <?= $item["permission"] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group col-md">
+                                                        <label for="date">Date:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('F j, Y', strtotime($item['date'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                    <div class="form-group col-md">
+                                                        <label for="time">Time:</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<?= date('h:i a', strtotime($item['time'])) ?>"
+                                                            disabled>
+                                                    </div>
+                                                </div>
+
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="groom_name">Groom's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["groom_name"] ?>" disabled>
+                                                            value="<?= $item["groom_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="groom_age">Groom's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["groom_age"] ?>" disabled>
+                                                            value="<?= $item["groom_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="groom_father_name">Groom's Father Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["groom_father_name"] ?>" disabled>
+                                                            value="<?= $item["groom_father_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="groom_mother_name">Groom's Mother Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["groom_mother_name"] ?>" disabled>
+                                                            value="<?= $item["groom_mother_name"] ?>" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <label for="bride_name">Bride's Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["bride_name"] ?>" disabled>
+                                                            value="<?= $item["bride_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="bride_age">Bride's Age:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["bride_age"] ?>" disabled>
+                                                            value="<?= $item["bride_age"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="bride_father_name">Bride's Father Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["bride_father_name"] ?>" disabled>
+                                                            value="<?= $item["bride_father_name"] ?>" disabled>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <label for="bride_mother_name">Bride's Mother Name:</label>
                                                         <input type="text" class="form-control"
-                                                            value="<?= $itemdecline["bride_mother_name"] ?>" disabled>
+                                                            value="<?= $item["bride_mother_name"] ?>" disabled>
                                                     </div>
                                                 </div>
 
@@ -1397,7 +1601,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["psa_cenomar_photocopy_groom"];
+                                                        $url = $item["psa_cenomar_photocopy_groom"];
                                                         $hiddenValue = str_repeat('PSA Cenomar Photocopy (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1405,18 +1609,18 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["psa_cenomar_photocopy_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_cenomar_photocopy_groom"] ?>">View</button>
                                                             </div>
                                                         </div>
                                                         <div class="file-path" id="psa_cenomar_photocopy_groom_path"
                                                             style="display: none;">
-                                                            <?= $itemdecline["psa_cenomar_photocopy_groom"] ?>
+                                                            <?= $item["psa_cenomar_photocopy_groom"] ?>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["psa_cenomar_photocopy_bride"];
+                                                        $url = $item["psa_cenomar_photocopy_bride"];
                                                         $hiddenValue = str_repeat('PSA Cenomar Photocopy (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1424,11 +1628,11 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["psa_cenomar_photocopy_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_cenomar_photocopy_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="psa_cenomar_photocopy_bride_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["psa_cenomar_photocopy_bride"] ?>
+                                                                <?= $item["psa_cenomar_photocopy_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1436,7 +1640,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["baptismal_certificates_groom"];
+                                                        $url = $item["baptismal_certificates_groom"];
                                                         $hiddenValue = str_repeat('Baptismal Certificates (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1444,19 +1648,19 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["baptismal_certificates_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["baptismal_certificates_groom"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="baptismal_certificates_groom_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["baptismal_certificates_groom"] ?>
+                                                                <?= $item["baptismal_certificates_groom"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["baptismal_certificates_bride"];
+                                                        $url = $item["baptismal_certificates_bride"];
                                                         $hiddenValue = str_repeat('Baptismal Certificates (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1464,12 +1668,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["baptismal_certificates_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["baptismal_certificates_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="baptismal_certificates_bride_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["baptismal_certificates_bride"] ?>
+                                                                <?= $item["baptismal_certificates_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1477,7 +1681,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["psa_birth_certificate_photocopy_groom"];
+                                                        $url = $item["psa_birth_certificate_photocopy_groom"];
                                                         $hiddenValue = str_repeat('PSA Birth Certificate Photocopy (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1485,19 +1689,19 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["psa_birth_certificate_photocopy_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_birth_certificate_photocopy_groom"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="psa_birth_certificate_photocopy_groom_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["psa_birth_certificate_photocopy_groom"] ?>
+                                                                <?= $item["psa_birth_certificate_photocopy_groom"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["psa_birth_certificate_photocopy_bride"];
+                                                        $url = $item["psa_birth_certificate_photocopy_bride"];
                                                         $hiddenValue = str_repeat('PSA Birth Certificate Photocopy (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1505,12 +1709,12 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["psa_birth_certificate_photocopy_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["psa_birth_certificate_photocopy_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="psa_birth_certificate_photocopy_bride_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["psa_birth_certificate_photocopy_bride"] ?>
+                                                                <?= $item["psa_birth_certificate_photocopy_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1518,7 +1722,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["id_picture_groom"];
+                                                        $url = $item["id_picture_groom"];
                                                         $hiddenValue = str_repeat('ID Picture (Groom):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1526,18 +1730,18 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["id_picture_groom"] ?>">View</button>
+                                                                    data-url="<?= $item["id_picture_groom"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="id_picture_groom_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["id_picture_groom"] ?>
+                                                                <?= $item["id_picture_groom"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["id_picture_bride"];
+                                                        $url = $item["id_picture_bride"];
                                                         $hiddenValue = str_repeat('ID Picture (Bride):', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1545,11 +1749,11 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["id_picture_bride"] ?>">View</button>
+                                                                    data-url="<?= $item["id_picture_bride"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="id_picture_bride_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["id_picture_bride"] ?>
+                                                                <?= $item["id_picture_bride"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1557,7 +1761,7 @@ tr {
                                                 <div class="form-row">
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["confirmation_certificates"];
+                                                        $url = $item["confirmation_certificates"];
                                                         $hiddenValue = str_repeat('Confirmation Certificates:', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1565,17 +1769,17 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["confirmation_certificates"] ?>">View</button>
+                                                                    data-url="<?= $item["confirmation_certificates"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path" id="confirmation_certificates_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["confirmation_certificates"] ?>
+                                                                <?= $item["confirmation_certificates"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group col-md">
                                                         <?php
-                                                        $url = $itemdecline["computerized_name_of_sponsors"];
+                                                        $url = $item["computerized_name_of_sponsors"];
                                                         $hiddenValue = str_repeat('Computerized Name of Sponsors:', strlen(1));
                                                         ?>
                                                         <div class="input-group">
@@ -1583,22 +1787,22 @@ tr {
                                                                 value="<?= $hiddenValue ?>" disabled>
                                                             <div class="input-group-append">
                                                                 <button class="btn btn-primary view-btn"
-                                                                    data-url="<?= $itemdecline["computerized_name_of_sponsors"] ?>">View</button>
+                                                                    data-url="<?= $item["computerized_name_of_sponsors"] ?>">View</button>
                                                             </div>
                                                             <div class="file-path"
                                                                 id="computerized_name_of_sponsors_path"
                                                                 style="display: none;">
-                                                                <?= $itemdecline["computerized_name_of_sponsors"] ?>
+                                                                <?= $item["computerized_name_of_sponsors"] ?>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <div class="modal-footer">
-                                                <button type="button" class="btn btn-success" data-dismiss="modal">
-                                                    OK
-                                                </button>
-                                            </div>
+                                                    <button type="button" class="btn btn-success" data-dismiss="modal">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1611,6 +1815,7 @@ tr {
                 </div>
             </div>
         </div>
+
     </div>
 
     <div id="imageModal" class="modal_pic">
@@ -1703,7 +1908,6 @@ function approveWedding(itemId) {
         }
     });
 }
-
 </script>
 
 <script>
@@ -1721,7 +1925,7 @@ function declineWedding(dataId) {
             console.log('AJAX Success:', response);
             if (response.trim() === 'success') {
                 alert('The application declined successfully!');
-                alert('Please Visit Decline tab For Sending Decline Email Thank You');
+                // alert('Decline email has been sent!');
                 sendDeclineEmail(dataId);
                 location.reload();
             } else {
@@ -1734,6 +1938,7 @@ function declineWedding(dataId) {
         }
     });
 }
+
 function sendDeclineEmail(dataId) {
     $.ajax({
         type: 'GET',
@@ -1882,22 +2087,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display =
-                    'none'; 
-            }
-        });
+    window.addEventListener('click', function(event) {
+        if (event.target == modal) {
+            modal.style.display =
+                'none';
+        }
+    });
 
-        modal.addEventListener('contextmenu', function(event) {
-            event
-                .preventDefault(); 
-        });
+    modal.addEventListener('contextmenu', function(event) {
+        event
+            .preventDefault();
+    });
 
-        modalImg.addEventListener('contextmenu', function(event) {
-            event
-                .preventDefault(); 
-        });
+    modalImg.addEventListener('contextmenu', function(event) {
+        event
+            .preventDefault();
+    });
 });
 </script>
 <style>
@@ -1942,5 +2147,12 @@ document.addEventListener("DOMContentLoaded", function() {
     color: #bbb;
     text-decoration: none;
     cursor: pointer;
+}
+
+.nav-fill>.nav-link,
+.nav-fill .nav-item {
+    flex: none !important;
+    text-align: center;
+    width: 200px !important;
 }
 </style>

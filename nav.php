@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nav</title>
-    <link rel="icon" type="image/x-icon" href="image/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="image/admin.ico">
     <link rel="stylesheet" href="style/nav.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
         integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
@@ -98,8 +98,8 @@ mysqli_close($conn);
                     class="fas fa-box"></i> Products
             </a>
             <a <?php if ($activePage === 'orders') echo 'class="active"'; ?> href="orders.php"><i
-                    class="fas fa-shopping-cart"></i> Orders <?php if ($total_order > 0): ?>
-                <span class="badge badge-danger rounded-circle"><?php echo $total_order; ?></span>
+                    class="fas fa-shopping-cart"></i> Orders <?php if ($total_ship > 0): ?>
+                <span class="badge badge-danger rounded-circle"><?php echo $total_ship; ?></span>
                 <?php endif; ?></a>
             <div class="services-dropdown">
                 <a href="#"><i class="fas fa-church"></i> Services &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <i
@@ -140,7 +140,12 @@ mysqli_close($conn);
             <a <?php if ($activePage === 'admin') echo 'class="active"'; ?> href="admin.php"><i
                     class="fas fa-users"></i>
                 Admin</a>
-
+            <a <?php if ($activePage === 'faq') echo 'class="active"'; ?> href="faq.php"><i class="fas fa-question"></i>
+                FAQ</a>
+            <a <?php if ($activePage === 'blog') echo 'class="active"'; ?> href="blog.php"><i class="fas fa-globe"></i>
+                Blog</a>
+            <a <?php if ($activePage === 'calendar') echo 'class="active"'; ?> href="calendar.php"><i class="fas fa-calendar"></i>
+            Calendar</a>
         </div>
 
         <!--Modal: Login with Avatar Form-->
@@ -252,56 +257,58 @@ body {
     font-size: 100% ! important;
 
 }
+
 /* notif button */
 .inbox-btn {
-        width: 47px;
-        height: 47px;
-        border-radius: 50%;
-        border: none;
-        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.082);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 10px;
-        position: relative;
-        background-color: #464646;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
+    width: 47px;
+    height: 47px;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.082);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    position: relative;
+    background-color: #464646;
+    cursor: pointer;
+    transition: all 0.3s;
+}
 
-    .inbox-btn svg path {
-        fill: white;
-    }
+.inbox-btn svg path {
+    fill: white;
+}
 
-    .inbox-btn svg {
-        height: 17px;
-        transition: all 0.3s;
-        font-size: 20px;
-    }
+.inbox-btn svg {
+    height: 17px;
+    transition: all 0.3s;
+    font-size: 20px;
+}
 
-    .inbox-btn .fas {
-        color: white;
-        height: 17px;
-        transition: all 0.3s;
-        font-size: 20px;
-    }
+.inbox-btn .fas {
+    color: white;
+    height: 17px;
+    transition: all 0.3s;
+    font-size: 20px;
+}
 
-    .msg-count {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        /* background-color: rgb(255, 255, 255); */
-        background-color: #dc3545;
-        color: #fff;
-        border-radius: 50%;
-        font-size: 0.7em;
-        /* color: rgb(0, 0, 0); */
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.msg-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    /* background-color: rgb(255, 255, 255); */
+    background-color: #dc3545;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.7em;
+    /* color: rgb(0, 0, 0); */
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .nav-header {
     display: flex;
     background-color: #212529;
@@ -680,7 +687,7 @@ font-weight: bold;
 .topnav-right {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 10px;
     /* Adjust the gap between logo and profile */
     margin-right: 20px;
 }

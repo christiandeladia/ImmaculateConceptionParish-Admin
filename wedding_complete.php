@@ -32,7 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $notificationweddingResult = mysqli_stmt_execute($stmtInsert);
 
                 if ($notificationweddingResult) {
-                    echo 'success';
+                    // Update status in wedding_banns table
+                    $updateBannsQuery = "UPDATE wedding_banns SET status = 'ended' WHERE reference_id = '{$row['reference_id']}'";
+                    $updateBannsResult = mysqli_query($conn, $updateBannsQuery);
+
+                    if ($updateBannsResult) {
+                        echo 'success';
+                    } else {
+                        // Log detailed error message or provide more specific information
+                        echo 'update_banns_error';
+                    }
                 } else {
                     // Log detailed error message or provide more specific information
                     echo 'notification_insert_error';

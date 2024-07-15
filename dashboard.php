@@ -10,9 +10,10 @@ if (!isset($_SESSION['auth_admin'])) {
 function getBestSellers($pdo) {
     $query = "SELECT product_name, SUM(product_quantity) AS total_quantity 
               FROM orders 
+              WHERE status = 4
               GROUP BY product_name 
               ORDER BY total_quantity DESC 
-              LIMIT 3"; 
+              LIMIT 2"; 
 
     $statement = $pdo->prepare($query);
     $statement->execute();
@@ -22,7 +23,7 @@ function getBestSellers($pdo) {
 // Get best sellers data using PDO
 $bestSellers = getBestSellers($pdo);
 ?>
-
+<?php include 'process/formula.php';?>
 <?php
 if (isset($_SESSION['auth_login'])) {
     $auth = $_SESSION['auth_login'];
@@ -41,7 +42,7 @@ if (!$result) {
 $row = mysqli_fetch_assoc($result);
 ?>
 
-<?php include 'process/formula.php';?>
+
 
 <?php 
 date_default_timezone_set('Asia/Manila'); // Set the timezone to Philippines
@@ -77,7 +78,7 @@ function getTimeAgo($timestamp) {
 
 function getMassIData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 2 ORDER BY date_added DESC";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 2 ORDER BY date_added DESC";
     $massIntention = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -94,7 +95,7 @@ $massIntention = getMassIData();
 
 function getData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM notification ORDER BY date_added DESC";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM notification ORDER BY date_added DESC";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -123,7 +124,7 @@ $service_links = array(
 <?php 
 function getMassData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM mass WHERE status_id = 3";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -135,7 +136,7 @@ $mass = getMassData();
 <?php 
 function getWeddingData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM wedding WHERE status_id = 3";
     $inventory = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -147,7 +148,7 @@ $wedding = getWeddingData();
 <?php 
     function getBaptismalData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM binyag WHERE status_id = 3";
     $Baptismal = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -160,7 +161,7 @@ $wedding = getWeddingData();
 <?php 
     function getBlessingData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM blessing WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM blessing WHERE status_id = 3";
     $Blessing = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -172,7 +173,7 @@ $wedding = getWeddingData();
 <?php 
     function getFuneralData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM funeral WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM funeral WHERE status_id = 3";
     $complete = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -184,7 +185,7 @@ $wedding = getWeddingData();
 <?php 
     function getSickcallData() {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall WHERE status_id = 3";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM sickcall WHERE status_id = 3";
     $complete = [];
     $reference_id = uniqid();
     $statement = $pdo->prepare($query);
@@ -205,14 +206,14 @@ $wedding = getWeddingData();
 // Function to get data for last week
 function getDataLastWeek($tableName) {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW()) - 1";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW()) - 1";
     $statement = $pdo->prepare($query);
     $statement->execute();
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
 function getDatathisWeek($tableName) {
     global $pdo;
-    $query = "SELECT *, DATE_FORMAT(date_added, '%d/%m/%Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW())";
+    $query = "SELECT *, DATE_FORMAT(date_added, '%M %d, %Y') AS date_component, TIME_FORMAT(date_added, '%h:%i %p') AS time_component FROM $tableName WHERE WEEK(date_added) = WEEK(NOW())";
     $statement = $pdo->prepare($query);
     $statement->execute();
     return $statement->fetchAll(PDO::FETCH_ASSOC);
@@ -256,7 +257,7 @@ $totalthisWeekBlessing = count($thisWeekBlessing);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="image/admin.ico">
-    <title>Dashborad | Admin</title>
+    <title>Dashboard | Admin</title>
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
@@ -322,49 +323,16 @@ $totalthisWeekBlessing = count($thisWeekBlessing);
                     <p class="challenges__text"><?php echo $product_name . ' - ' . $total_quantity . ' sold'; ?></p>
                     <?php endforeach; ?>
                     <?php else: ?>
-                    <p class="challenges__text"><br><br><br>No Orders found.<br><br><br><br></p>
+                    <p class="challenges__text"><br><br>No orders yet.<br><br><br><br></p>
                     <?php endif; ?>
                 </section>
 
 
 
                 <div class="grid-area-1-2">
-                    <section class="recent">
-                        <h2 style="font-size: 25px; padding: 5px 0 10px; 0">Record Book</h2>
-                        <table cellspacing="0" cellpadding="0">
-                            <tr>
-                                <td><img src="image/baptismal_icon.png" alt=""></td>
-                                <td>Baptismal</td>
-                                <td><?php echo $total_binyag; ?></td>
-                            </tr>
-                            <tr>
-                                <td><img src="image/funeral_icon.png" alt=""></td>
-                                <td>Funeral</td>
-                                <td><?php echo $total_funeral; ?></td>
-                            </tr>
-                            <tr>
-                                <td><img src="image/wedding_icon.png" alt=""></td>
-                                <td>Wedding</td>
-                                <td><?php echo $total_wedding; ?></td>
-                            </tr>
-                            <tr>
-                                <td><img src="image/blessing_icon.png" alt=""></td>
-                                <td>Blessing</td>
-                                <td><?php echo $total_blessing; ?></td>
-                            </tr>
-                            <tr>
-                                <td><img src="image/mass_icon.png" alt=""></td>
-                                <td>Mass</td>
-                                <td><?php echo $total_mass; ?></td>
-                            </tr>
-                            <tr>
-                                <td><img src="image/sickcall_icon.png" alt=""></td>
-                                <td>Sickcall</td>
-                                <td><?php echo $total_sickcall; ?></td>
-                            </tr>
-                        </table>
-                        <a href="recordbook.php" style="padding-top: 15px;">View all &rarr;</a>
-                    </section>
+                    <div class="container">
+                        <div id="calendar"></div>
+                    </div>
 
                 </div>
             </div>
@@ -381,18 +349,17 @@ $totalthisWeekBlessing = count($thisWeekBlessing);
                     $current_week_start = new DateTime('monday this week');
                     $current_week_end = new DateTime('sunday this week');
                     $events_this_week = array_filter($massIntention, function($item) use ($current_week_start, $current_week_end) {
-                        $start_date = new DateTime($item['date_started']);
-                        $end_date = new DateTime($item['date_ended']);
-                        return $start_date >= $current_week_start && $end_date <= $current_week_end;
+                        $start_date = new DateTime($item['date']);
+                        return $start_date >= $current_week_start && $start_date <= $current_week_end;
                     });
                     usort($events_this_week, function($a, $b) {
-                        return strtotime($a['date_started']) - strtotime($b['date_started']);
+                        return strtotime($a['date']) - strtotime($b['date']);
                     });
 
                     if (empty($events_this_week)) {
-                        echo "<p>No record found</p>";
+                        echo "<p>No schedule yet</p>";
                     } else {
-                        ?>
+                    ?>
                     <table cellspacing="0" cellpadding="0">
                         <tr>
                             <th>Date</th>
@@ -401,26 +368,25 @@ $totalthisWeekBlessing = count($thisWeekBlessing);
                             <th>Time</th>
                         </tr>
                         <?php
-                        $counter = 0;
-                        foreach ($events_this_week as $item) {
-                            if ($counter >= 5) {
-                                break; 
-                            }
+            $counter = 0;
+            foreach ($events_this_week as $item) {
+                if ($counter >= 5) {
+                    break; 
+                }
 
-                            $formatted_date_started = date('M d, Y', strtotime($item['date_started']));
-                            $formatted_date_ended = date('M d, Y', strtotime($item['date_ended']));
-                            $day_of_week = date('l', strtotime($item['date_started']));
+                $formatted_date = date('M d, Y', strtotime($item['date']));
+                $day_of_week = date('l', strtotime($item['date']));
 
-                            echo "<tr>";
-                            echo "<td>{$formatted_date_started} - {$formatted_date_ended}</td>";
-                            echo "<td>{$day_of_week}</td>";
-                            echo "<td>{$item['purpose']}</td>";
-                            echo "<td>{$item['time']}</td>";
-                            echo "</tr>";
+                echo "<tr>";
+                echo "<td>{$formatted_date}</td>";
+                echo "<td>{$day_of_week}</td>";
+                echo "<td>{$item['purpose']}</td>";
+                echo "<td>{$item['time']}</td>";
+                echo "</tr>";
 
-                            $counter++;
-                        }
-                        ?>
+                $counter++;
+            }
+            ?>
                     </table>
                     <?php } ?>
                 </section>
@@ -519,7 +485,7 @@ $totalthisWeekBlessing = count($thisWeekBlessing);
                         <p>Sickcall</p>
                         <p>Mass</p>
                     </div>
-                    
+
                     <?php
                         }
                         ?>
@@ -535,7 +501,7 @@ $totalthisWeekBlessing = count($thisWeekBlessing);
             <?php 
             $unreadCount = 0; 
             foreach ($inventory as $item) {
-                if ($unreadCount >= 2) {
+                if ($unreadCount >= 4) {
                     break;
                 }
                 if ($item['status'] == 'unread') {
@@ -616,6 +582,66 @@ $totalthisWeekBlessing = count($thisWeekBlessing);
     });
     </script>
     </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
+    <style>
+    a.fc-day-grid-event.fc-h-event.fc-event.fc-start.fc-end.fc-draggable {
+        border: none;
+        font-size: 15px;
+        border-radius: 20px;
+        padding: 5px;
+        margin: 3px 10px;
+    }
+
+    .container {
+        width: 100%;
+        background-color: white;
+        margin: 0 0 2rem 0;
+        box-shadow: 0 0 3rem rgba(0, 0, 0, 0.3);
+        border-radius: 0.8rem;
+        padding: 20px;
+    }
+    </style>
+    <script>
+    $(document).ready(function() {
+        var calendar = $('#calendar').fullCalendar({
+            editable: true,
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            events: 'calendar_schedule.php',
+            eventRender: function(event, element) {
+                // Change background color based on 'services' value
+                switch (event.title) {
+                    case 'Wedding':
+                        element.css('background-color', 'rgb(217 150 150)');
+                        break;
+                    case 'Baptism':
+                        element.css('background-color', 'rgb(255 255 151)');
+                        break;
+                    case 'Sickcall':
+                        element.css('background-color', 'rgb(246 135 235)');
+                        break;
+                    case 'Blessing':
+                        element.css('background-color', 'rgb(184 184 246)');
+                        break;
+                    case 'Funeral':
+                        element.css('background-color', '#f5daaabd');
+                        break;
+                    default:
+                        element.css('background-color', 'rgb(148 230 148)');
+                }
+            }
+        });
+    });
+    </script>
 </body>
 
 </html>

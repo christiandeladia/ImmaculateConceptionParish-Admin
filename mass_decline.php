@@ -34,22 +34,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     echo 'success';
                 } else {
                     // Error inserting notification
-                    echo 'error inserting notification';
+                    ?>
+                    <script>
+                        console.error('error inserting notification');
+                    </script>
+                    <?php
                 }
             } else {
                 // Error updating record
-                echo 'error updating record';
+                ?>
+                <script>
+                    console.error('error updating record');
+                </script>
+                <?php
             }
         } else {
             // Error fetching record
-            echo 'error fetching record';
+            ?>
+            <script>
+                console.error('error fetching record');
+            </script>
+            <?php
         }
     } else {
         // DataId is not set
-        echo 'error: dataId is not set';
+        ?>
+        <script>
+            console.error('connection lost!');
+            header("Location: mass.php");
+            exit();
+        </script>
+        <?php
     }
 } else {
     // Invalid request method
-    echo 'error: invalid request method';
+    ?>
+    <script>
+        console.error('error: invalid request method');
+    </script>
+    <?php
 }
 ?>
